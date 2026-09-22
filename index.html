@@ -2,62 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPI QR Generator & Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UPI QR & Expense Tracker</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .app-container {
+            max-width: 480px;
+            margin: auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        /* Custom scrollbar for app feel */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 sm:p-6">
-    <div class="max-w-2xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-indigo-600">UPI QR & Expense Tracker</h1>
-            <p class="text-gray-600 text-sm mt-1">Generate UPI payment QR and keep track of your transactions locally.</p>
+<body class="p-0 sm:py-6">
+
+    <div class="app-container bg-slate-50 sm:rounded-3xl shadow-2xl overflow-hidden">
+        
+        <!-- App Header Bar -->
+        <header class="bg-gradient-to-r from-orange-500 to-amber-500 text-white p-5 text-center shadow-md">
+            <h1 class="text-xl font-bold tracking-wide">UPI Pay & Tracker</h1>
+            <p class="text-xs text-orange-100 mt-0.5">Fast QR generator & local history</p>
         </header>
-        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Create Payment QR</h2>
-            <form id="upiForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">UPI ID or Mobile Number</label>
-                    <input type="text" id="upiId" required placeholder="e.g., 9876543210@paytm or 9876543210" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Amount (&#8377;)</label>
-                    <input type="number" id="amount" step="0.01" required placeholder="e.g., 500" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description / Reason</label>
-                    <input type="text" id="description" required placeholder="e.g., Dinner with friends" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition duration-200">Generate QR & Save</button>
-            </form>
-        </div>
-        <div id="qrContainer" class="hidden bg-white rounded-xl shadow-md p-6 mb-8 text-center">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Scan to Pay</h2>
-            <div id="qrcode" class="flex justify-center mb-4"></div>
-            <p id="qrDetails" class="text-gray-600 font-medium mb-4"></p>
-            <button id="shareBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition duration-200">Share Details</button>
-        </div>
-        <div class="bg-white rounded-xl shadow-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-800">Transaction History</h2>
-                <button onclick="clearHistory()" class="text-sm text-red-600 hover:underline">Clear History</button>
+
+        <!-- App Main Content Area -->
+        <main class="flex-1 p-4 overflow-y-auto space-y-4">
+            
+            <!-- Input Form Card -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-orange-100">
+                <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">New Payment</h2>
+                <form id="upiForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">UPI ID or Mobile Number</label>
+                        <input type="text" id="upiId" required placeholder="e.g., 9876543210@paytm" 
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Amount (&#8377;)</label>
+                        <input type="number" id="amount" step="0.01" required placeholder="0.00" 
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1">Description / Reason</label>
+                        <input type="text" id="description" required placeholder="e.g., Lunch, Auto Fare" 
+                            class="w-full px-3 py-2.5 bg-slate-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-orange-500 focus:outline-none transition">
+                    </div>
+                    <button type="submit" 
+                        class="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold py-3 rounded-xl shadow-md shadow-orange-500/30 transition duration-200 text-sm">
+                        Generate QR Code
+                    </button>
+                </form>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b text-gray-600 text-sm">
-                            <th class="py-2 px-3">Date/Time</th>
-                            <th class="py-2 px-3">UPI / Mobile</th>
-                            <th class="py-2 px-3">Description</th>
-                            <th class="py-2 px-3">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTable" class="text-sm text-gray-700"></tbody>
-                </table>
+
+            <!-- QR Display Card (Hidden by default) -->
+            <div id="qrContainer" class="hidden bg-white rounded-2xl p-5 shadow-sm border border-orange-100 text-center">
+                <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-3">Scan to Pay</h2>
+                <div id="qrcode" class="flex justify-center p-3 bg-slate-50 rounded-xl mb-3 inline-block"></div>
+                <p id="qrDetails" class="text-xs text-gray-600 font-medium mb-4"></p>
+                <button id="shareBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition duration-200 shadow-sm">
+                    Share Payment Link
+                </button>
             </div>
-        </div>
+
+            <!-- History Section Card -->
+            <div class="bg-white rounded-2xl p-5 shadow-sm border border-orange-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Recent Activity</h2>
+                    <button onclick="clearHistory()" class="text-xs text-red-500 font-semibold hover:underline">Clear</button>
+                </div>
+                <div class="overflow-x-auto max-h-56">
+                    <table class="w-full text-left border-collapse">
+                        <tbody id="historyTable" class="text-xs text-gray-700 divide-y divide-gray-100">
+                            <!-- Rows will load here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- App Footer Nav bar style -->
+        <footer class="bg-white border-t border-gray-100 py-3 text-center text-[11px] text-gray-400">
+            UPI Tracker App &bull; Secure Local Storage
+        </footer>
+
     </div>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -73,31 +118,36 @@
         document.addEventListener('DOMContentLoaded', loadHistory);
         let qrCodeInstance = null;
         let currentShareData = {};
+
         upiForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const upiId = document.getElementById('upiId').value.trim();
             const amount = document.getElementById('amount').value.trim();
             const description = document.getElementById('description').value.trim();
             const now = new Date();
-            const dateTime = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const dateTime = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
             let formattedUpi = upiId;
             if (!upiId.includes('@')) {
                 formattedUpi = upiId + '@paytm';
             }
             const upiString = `upi://pay?pa=${encodeURIComponent(formattedUpi)}&am=${encodeURIComponent(amount)}&tn=${encodeURIComponent(description)}&cu=INR`;
+            
             qrcodeDiv.innerHTML = "";
-            qrCodeInstance = new QRCode(qrcodeDiv, { text: upiString, width: 200, height: 200 });
+            qrCodeInstance = new QRCode(qrcodeDiv, { text: upiString, width: 170, height: 170 });
             qrContainer.classList.remove('hidden');
-            qrDetails.innerHTML = `Paying <strong>&#8377;${amount}</strong> to <strong>${upiId}</strong> for "${description}"`;
+            qrContainer.scrollIntoView({ behavior: 'smooth' });
+            
+            qrDetails.innerHTML = `Paying <strong class="text-orange-600">&#8377;${amount}</strong> to <strong class="text-gray-800">${upiId}</strong>`;
             currentShareData = {
-                title: 'UPI Payment Link',
-                text: `Please pay \u20b9${amount} for "${description}". UPI ID: ${formattedUpi}`,
+                title: 'UPI Payment',
+                text: `Pay \u20b9${amount} for "${description}". UPI ID: ${formattedUpi}`,
                 url: upiString
             };
             saveToLocalStorage({ dateTime, upiId, description, amount });
             upiForm.reset();
             loadHistory();
         });
+
         shareBtn.addEventListener('click', async () => {
             if (navigator.share) {
                 try {
@@ -106,38 +156,39 @@
                     console.log('Error sharing:', err);
                 }
             } else {
-                alert('Sharing is not supported on this browser. Copy link instead.');
+                alert('Sharing is not supported on this browser.');
             }
         });
+
         function saveToLocalStorage(transaction) {
             let history = JSON.parse(localStorage.getItem('upi_transactions')) || [];
             history.unshift(transaction);
             localStorage.setItem('upi_transactions', JSON.stringify(history));
         }
+
         function loadHistory() {
             let history = JSON.parse(localStorage.getItem('upi_transactions')) || [];
             historyTable.innerHTML = '';
             if (history.length === 0) {
-                historyTable.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-400">No transactions recorded yet.</td></tr>`;
+                historyTable.innerHTML = `<tr><td class="text-center py-6 text-gray-400">No transactions recorded yet.</td></tr>`;
                 return;
             }
             history.forEach(item => {
                 const row = document.createElement('tr');
-                row.className = "border-b hover:bg-gray-50";
-                row.innerHTML = `<td class="py-2 px-3 text-xs text-gray-500">${item.dateTime}</td><td class="py-2 px-3 font-medium">${item.upiId}</td><td class="py-2 px-3">${item.description}</td><td class="py-2 px-3 font-semibold text-indigo-600">&#8377;${item.amount}</td>`;
-                historyTable.localhost ? '' : historyTable.appendChild(row); // simplified append
-            });
-            // Fixing append row properly
-            historyTable.innerHTML = '';
-            history.forEach(item => {
-                const row = document.createElement('tr');
-                row.className = "border-b hover:bg-gray-50";
-                row.innerHTML = `<td class="py-2 px-3 text-xs text-gray-500">${item.dateTime}</td><td class="py-2 px-3 font-medium">${item.upiId}</td><td class="py-2 px-3">${item.description}</td><td class="py-2 px-3 font-semibold text-indigo-600">&#8377;${item.amount}</td>`;
+                row.className = "hover:bg-orange-50/50 transition";
+                row.innerHTML = `
+                    <td class="py-2.5 px-2">
+                        <div class="font-bold text-gray-800">${item.upiId}</div>
+                        <div class="text-[10px] text-gray-400">${item.description} &bull; ${item.dateTime}</div>
+                    </td>
+                    <td class="py-2.5 px-2 text-right font-bold text-orange-600">&#8377;${item.amount}</td>
+                `;
                 historyTable.appendChild(row);
             });
         }
+
         function clearHistory() {
-            if (confirm('Kya aap saari transaction history delete karna chahte hain?')) {
+            if (confirm('Kya aap saari history delete karna chahte hain?')) {
                 localStorage.removeItem('upi_transactions');
                 loadHistory();
             }
