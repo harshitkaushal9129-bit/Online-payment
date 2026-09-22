@@ -4,9 +4,8 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
-  "background_color": "#f1f5f9",
-  "theme_color": "#4f46e5",
+  "background_color": "#ff6b00",
+  "theme_color": "#ff6b00",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2885/2885437.png",
@@ -17,7 +16,7 @@
     {
       "src": "https://cdn-icons-png.flaticon.com/512/2885/2885437.png",
       "sizes": "512x512",
-      "type": "image/png",
+      "type5": "image/png",
       "purpose": "any maskable"
     }
   ]
