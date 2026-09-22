@@ -35,7 +35,8 @@
         <div id="qrContainer" class="hidden bg-white rounded-xl shadow-md p-6 mb-8 text-center">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Scan to Pay</h2>
             <div id="qrcode" class="flex justify-center mb-4"></div>
-            <p id="qrDetails" class="text-gray-600 font-medium"></p>
+            <p id="qrDetails" class="text-gray-600 font-medium mb-4"></p>
+            <button id="shareBtn" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg transition duration-200">Share Details</button>
         </div>
         <div class="bg-white rounded-xl shadow-md p-6">
             <div class="flex justify-between items-center mb-4">
@@ -60,7 +61,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed: ', err));
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
             });
         }
         const upiForm = document.getElementById('upiForm');
@@ -68,8 +69,10 @@
         const qrcodeDiv = document.getElementById('qrcode');
         const qrDetails = document.getElementById('qrDetails');
         const historyTable = document.getElementById('historyTable');
+        const shareBtn = document.getElementById('shareBtn');
         document.addEventListener('DOMContentLoaded', loadHistory);
         let qrCodeInstance = null;
+        let currentShareData = {};
         upiForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const upiId = document.getElementById('upiId').value.trim();
@@ -86,9 +89,25 @@
             qrCodeInstance = new QRCode(qrcodeDiv, { text: upiString, width: 200, height: 200 });
             qrContainer.classList.remove('hidden');
             qrDetails.innerHTML = `Paying <strong>&#8377;${amount}</strong> to <strong>${upiId}</strong> for "${description}"`;
+            currentShareData = {
+                title: 'UPI Payment Link',
+                text: `Please pay \u20b9${amount} for "${description}". UPI ID: ${formattedUpi}`,
+                url: upiString
+            };
             saveToLocalStorage({ dateTime, upiId, description, amount });
             upiForm.reset();
             loadHistory();
+        });
+        shareBtn.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share(currentShareData);
+                } catch (err) {
+                    console.log('Error sharing:', err);
+                }
+            } else {
+                alert('Sharing is not supported on this browser. Copy link instead.');
+            }
         });
         function saveToLocalStorage(transaction) {
             let history = JSON.parse(localStorage.getItem('upi_transactions')) || [];
@@ -102,6 +121,14 @@
                 historyTable.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-400">No transactions recorded yet.</td></tr>`;
                 return;
             }
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = "border-b hover:bg-gray-50";
+                row.innerHTML = `<td class="py-2 px-3 text-xs text-gray-500">${item.dateTime}</td><td class="py-2 px-3 font-medium">${item.upiId}</td><td class="py-2 px-3">${item.description}</td><td class="py-2 px-3 font-semibold text-indigo-600">&#8377;${item.amount}</td>`;
+                historyTable.localhost ? '' : historyTable.appendChild(row); // simplified append
+            });
+            // Fixing append row properly
+            historyTable.innerHTML = '';
             history.forEach(item => {
                 const row = document.createElement('tr');
                 row.className = "border-b hover:bg-gray-50";
