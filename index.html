@@ -300,7 +300,7 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 <script>
 let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false, currentUserData = null, isDemoBypassed = false;
 const f = document.getElementById('upiForm'), q = document.getElementById('qrContainer'), d = document.getElementById('qrcode'), dt = document.getElementById('qrDetails'), hl = document.getElementById('historyList'), sb = document.getElementById('shareBtn'), saveQrBtn = document.getElementById('saveQrBtn'), topSb = document.getElementById('topShareBtn'), infoBtn = document.getElementById('infoBtn'), infoModal = document.getElementById('infoModal'), closeModal = document.getElementById('closeModal'), themeSelector = document.getElementById('themeSelector');
-let inst = null, sd = {};
+let inst = null, sd = { title: 'Kaushalji UPI App', text: 'Check out this payment tool', url: window.location.href };
 
 function showNotification(msg) { const b = document.getElementById('customAlertBox'); document.getElementById('customAlertText').innerText = msg; b.classList.add('show'); setTimeout(() => { b.classList.remove('show'); }, 3000); }
 
@@ -336,7 +336,30 @@ function toggleToolsHub() {
   }
 }
 
-f.addEventListener('submit', async e => { e.preventDefault(); const u = document.getElementById('upiId').value.trim(), a = document.getElementById('amount').value.trim(), ds = document.getElementById('description').value.trim(), now = new Date(), tStr = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); let fu = u.includes('@') ? u : u + '@paytm', us = `upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`; d.innerHTML = ''; inst = new QRCode(d, { text: us, width: 160, height: 160 }); q.style.display = 'block'; q.scrollIntoView({ behavior: 'smooth' }); dt.innerHTML = `Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`; sd = { title: 'UPI Payment', text: `Pay \u20b9${a} for "${ds}". UPI: ${fu}`, url: us }; await saveToFirestore({ dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() }); f.reset(); loadHistory(); showNotification('QR Code Generated Successfully!'); });
+f.addEventListener('submit', async e => { 
+  e.preventDefault(); 
+  const u = document.getElementById('upiId').value.trim(), 
+        a = document.getElementById('amount').value.trim(), 
+        ds = document.getElementById('description').value.trim(), 
+        now = new Date(), 
+        tStr = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); 
+  let fu = u.includes('@') ? u : u + '@paytm', 
+      us = `upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`; 
+  
+  d.innerHTML = ''; 
+  inst = new QRCode(d, { text: us, width: 160, height: 160 }); 
+  q.style.display = 'block'; 
+  q.scrollIntoView({ behavior: 'smooth' }); 
+  dt.innerHTML = `Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`; 
+  
+  sd = { title: 'UPI Payment', text: `Pay \u20b9${a} for "${ds}". UPI: ${fu}`, url: us }; 
+  
+  // Saving to Firestore / Local Storage & reloading history immediately
+  await saveToFirestore({ dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() }); 
+  loadHistory(); 
+  f.reset(); 
+  showNotification('QR Code Generated & Saved to History!'); 
+});
 
 // Save QR Image Handler
 saveQrBtn.addEventListener('click', () => {
@@ -361,29 +384,129 @@ saveQrBtn.addEventListener('click', () => {
   }
 });
 
-sb.addEventListener('click', async () => { if (navigator.share) { try { await navigator.share(sd); } catch (e) {} } else { showNotification('Sharing not supported.'); } });
+sb.addEventListener('click', async () => { 
+  if (navigator.share) { 
+    try { 
+      await navigator.share(sd); 
+    } catch (e) { console.log(e); } 
+  } else { 
+    navigator.clipboard.writeText(sd.url);
+    showNotification('Payment link copied to clipboard!'); 
+  } 
+});
 
-topSb.addEventListener('click', async () => { if (navigator.share) { try { await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); } catch (e) {} } else { showNotification('Sharing not supported.'); } });
+topSb.addEventListener('click', async () => { 
+  if (navigator.share) { 
+    try { 
+      await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); 
+    } catch (e) { console.log(e); } 
+  } else { 
+    navigator.clipboard.writeText(window.location.href);
+    showNotification('App link copied to clipboard!'); 
+  } 
+});
 
 infoBtn.addEventListener('click', () => infoModal.style.display = 'flex');
 
 closeModal.onclick = () => infoModal.style.display = 'none';
 
-async function saveToFirestore(tx) { let user = window.firebaseAuth.currentUser; if (user && !isDemoBypassed) { try { await window.addDoc(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), tx); } catch (err) { console.error("Error saving transaction:", err); } } else { let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); localTx.unshift(tx); localStorage.setItem('kaushal_local_tx', JSON.stringify(localTx)); } }
+async function saveToFirestore(tx) { 
+  let user = window.firebaseAuth.currentUser; 
+  if (user && !isDemoBypassed) { 
+    try { 
+      await window.addDoc(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), tx); 
+    } catch (err) { console.error("Error saving transaction:", err); } 
+  } else { 
+    let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
+    localTx.unshift(tx); 
+    localStorage.setItem('kaushal_local_tx', JSON.stringify(localTx)); 
+  } 
+}
 
-async function loadHistory() { let user = window.firebaseAuth.currentUser; if (user && !isDemoBypassed) { try { const qRef = window.query(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), window.orderBy('timestamp', 'desc')); const querySnapshot = await window.getDocs(qRef); hl.innerHTML = ''; let total = 0; let count = 0; querySnapshot.forEach(docSnap => { let item = docSnap.data(); total += Number(item.amount); count++; const div = document.createElement('div'); div.className = 'history-item'; div.innerHTML = `<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`; hl.appendChild(div); }); document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; document.getElementById('txCount').innerText = `${count} Transactions`; if (count === 0) { hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; } } catch (err) { loadLocalHistory(); } } else { loadLocalHistory(); } }
+async function loadHistory() { 
+  let user = window.firebaseAuth.currentUser; 
+  if (user && !isDemoBypassed) { 
+    try { 
+      const qRef = window.query(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), window.orderBy('timestamp', 'desc')); 
+      const querySnapshot = await window.getDocs(qRef); 
+      hl.innerHTML = ''; 
+      let total = 0; 
+      let count = 0; 
+      querySnapshot.forEach(docSnap => { 
+        let item = docSnap.data(); 
+        total += Number(item.amount); 
+        count++; 
+        const div = document.createElement('div'); 
+        div.className = 'history-item'; 
+        div.innerHTML = `<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`; 
+        hl.appendChild(div); 
+      }); 
+      document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; 
+      document.getElementById('txCount').innerText = `${count} Transactions`; 
+      if (count === 0) { 
+        hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; 
+      } 
+    } catch (err) { loadLocalHistory(); } 
+  } else { loadLocalHistory(); } 
+}
 
-function loadLocalHistory() { let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); hl.innerHTML = ''; let total = 0; let count = localTx.length; localTx.forEach(item => { total += Number(item.amount); const div = document.createElement('div'); div.className = 'history-item'; div.innerHTML = `<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`; hl.appendChild(div); }); document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; document.getElementById('txCount').innerText = `${count} Transactions`; if (count === 0) { hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; } }
+function loadLocalHistory() { 
+  let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
+  hl.innerHTML = ''; 
+  let total = 0; 
+  let count = localTx.length; 
+  localTx.forEach(item => { 
+    total += Number(item.amount); 
+    const div = document.createElement('div'); 
+    div.className = 'history-item'; 
+    div.innerHTML = `<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`; 
+    hl.appendChild(div); 
+  }); 
+  document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; 
+  document.getElementById('txCount').innerText = `${count} Transactions`; 
+  if (count === 0) { 
+    hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; 
+  } 
+}
 
-async function clearHistory() { if (confirm('Delete all history?')) { let user = window.firebaseAuth.currentUser; if (user && !isDemoBypassed) { try { const querySnapshot = await window.getDocs(window.collection(window.firebaseDb, `users/${user.uid}/transactions`)); let deletions = querySnapshot.docs.map(dSnap => window.deleteDoc(window.doc(window.firebaseDb, `users/${user.uid}/transactions`, dSnap.id))); await Promise.all(deletions); loadHistory(); showNotification('History cleared!'); } catch (err) { showNotification('Error clearing history'); } } else { localStorage.removeItem('kaushal_local_tx'); loadHistory(); showNotification('History cleared!'); } } }
+async function clearHistory() { 
+  if (confirm('Delete all history?')) { 
+    let user = window.firebaseAuth.currentUser; 
+    if (user && !isDemoBypassed) { 
+      try { 
+        const querySnapshot = await window.getDocs(window.collection(window.firebaseDb, `users/${user.uid}/transactions`)); 
+        let deletions = querySnapshot.docs.map(dSnap => window.deleteDoc(window.doc(window.firebaseDb, `users/${user.uid}/transactions`, dSnap.id))); 
+        await Promise.all(deletions); 
+        loadHistory(); 
+        showNotification('History cleared!'); 
+      } catch (err) { showNotification('Error clearing history'); } 
+    } else { 
+      localStorage.removeItem('kaushal_local_tx'); 
+      loadHistory(); 
+      showNotification('History cleared!'); 
+    } 
+  } 
+}
 
-async function exportData() { let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); let blob = new Blob([JSON.stringify(localTx, null, 2)], { type: 'application/json' }); let url = URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; a.download = 'expense_history.json'; a.click(); showNotification('History exported successfully!'); }
+async function exportData() { 
+  let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
+  let blob = new Blob([JSON.stringify(localTx, null, 2)], { type: 'application/json' }); 
+  let url = URL.createObjectURL(blob); 
+  let a = document.createElement('a'); 
+  a.href = url; 
+  a.download = 'expense_history.json'; 
+  a.click(); 
+  showNotification('History exported successfully!'); 
+}
 
 // Fully Detailed Interactive Tool Modals
 function openToolModal(type) {
   const m = document.getElementById('toolModal'), t = document.getElementById('toolModalTitle'), b = document.getElementById('toolModalBody');
   m.style.display = 'flex';
-  if(type==='qr') { t.innerText='QR Code Generator'; b.innerHTML=`<input type="text" id="t-qr" class="form-input" placeholder="Enter text/url" style="margin-bottom:8px;"><button onclick="runToolAction('qr')" class="btn-secondary">Generate</button><div id="t-qr-res" style="text-align:center;margin-top:10px;"></div>`; }
+  if(type==='qr') { 
+    t.innerText='QR Code Generator'; 
+    b.innerHTML=`<input type="text" id="t-qr" class="form-input" placeholder="Enter text/url" style="margin-bottom:8px;"><button onclick="runToolAction('qr')" class="btn-secondary">Generate</button><div id="t-qr-res" style="text-align:center;margin-top:10px;"></div><div id="t-qrcode-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; 
+  }
   else if(type==='pass') { t.innerText='Password Generator'; b.innerHTML=`<button onclick="runToolAction('pass')" class="btn-secondary">Generate Secure Pass</button><div id="t-pass-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:14px;background:var(--input-bg);padding:8px;border-radius:8px;"></div>`; }
   else if(type==='bmi') { t.innerText='BMI Calculator'; b.innerHTML=`<input type="number" id="t-bmi-w" class="form-input" placeholder="Weight in kg" style="margin-bottom:6px;"><input type="number" id="t-bmi-h" class="form-input" placeholder="Height in meters" style="margin-bottom:6px;"><button onclick="runToolAction('bmi')" class="btn-secondary">Calculate BMI</button><div id="t-bmi-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='age') { t.innerText='Age Calculator'; b.innerHTML=`<input type="date" id="t-dob" class="form-input" style="margin-bottom:6px;"><button onclick="runToolAction('age')" class="btn-secondary">Check Age</button><div id="t-age-res" style="margin-top:10px;font-weight:bold;"></div>`; }
@@ -420,16 +543,26 @@ function openToolModal(type) {
   else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;"><button onclick="runToolAction('temp')" class="btn-secondary">Convert to Fahrenheit</button><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Fetch Live Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
   else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Say something" style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary">Speak Text</button>`; }
-  else if(type==='qrwifi') { t.innerText='WiFi QR Creator'; b.innerHTML=`<input type="text" id="t-wf" class="form-input" placeholder="WiFi SSID" style="margin-bottom:6px;"><button onclick="runToolAction('wifi')" class="btn-secondary">Generate WiFi QR</button>`; }
-  else if(type==='qremail') { t.innerText='Email QR Creator'; b.innerHTML=`<input type="text" id="t-em" class="form-input" placeholder="recipient@domain.com" style="margin-bottom:6px;"><button onclick="runToolAction('email')" class="btn-secondary">Generate Email QR</button>`; }
-  else if(type==='qrsms') { t.innerText='SMS QR Creator'; b.innerHTML=`<input type="text" id="t-sm" class="form-input" placeholder="Phone Number" style="margin-bottom:6px;"><button onclick="runToolAction('sms')" class="btn-secondary">Generate SMS QR</button>`; }
+  else if(type==='qrwifi') { t.innerText='WiFi QR Creator'; b.innerHTML=`<input type="text" id="t-wf" class="form-input" placeholder="WiFi SSID" style="margin-bottom:6px;"><button onclick="runToolAction('wifi')" class="btn-secondary">Generate WiFi QR</button><div id="t-wifi-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
+  else if(type==='qremail') { t.innerText='Email QR Creator'; b.innerHTML=`<input type="text" id="t-em" class="form-input" placeholder="recipient@domain.com" style="margin-bottom:6px;"><button onclick="runToolAction('email')" class="btn-secondary">Generate Email QR</button><div id="t-email-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
+  else if(type==='qrsms') { t.innerText='SMS QR Creator'; b.innerHTML=`<input type="text" id="t-sm" class="form-input" placeholder="Phone Number" style="margin-bottom:6px;"><button onclick="runToolAction('sms')" class="btn-secondary">Generate SMS QR</button><div id="t-sms-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
 }
 
 function closeToolModal() { document.getElementById('toolModal').style.display = 'none'; }
 
 // Fully Implemented Tool Actions
 function runToolAction(action) {
-  if(action==='qr') { let v=document.getElementById('t-qr').value; document.getElementById('t-qr-res').innerHTML = v ? `Generated Text: <b>${v}</b> ✅` : '<span style="color:red">Please enter text</span>'; }
+  if(action==='qr') { 
+    let v=document.getElementById('t-qr').value; 
+    let box = document.getElementById('t-qrcode-box');
+    box.innerHTML = '';
+    if(v) { 
+      new QRCode(box, { text: v, width: 120, height: 120 });
+      document.getElementById('t-qr-res').innerHTML = `Generated QR for: <b>${v}</b> ✅`; 
+    } else { 
+      document.getElementById('t-qr-res').innerHTML = '<span style="color:red">Please enter text</span>'; 
+    } 
+  }
   else if(action==='pass') { let p=Math.random().toString(36).slice(-8) + 'Ka@1'; document.getElementById('t-pass-res').innerText = p; }
   else if(action==='bmi') { let w=parseFloat(document.getElementById('t-bmi-w').value), h=parseFloat(document.getElementById('t-bmi-h').value); document.getElementById('t-bmi-res').innerText = (w && h) ? `Your BMI: ${(w/(h*h)).toFixed(2)}` : 'Please enter valid values'; }
   else if(action==='age') { let val=document.getElementById('t-dob').value; if(!val) { document.getElementById('t-age-res').innerText='Please select date'; return; } let dob=new Date(val), diff=Date.now()-dob.getTime(); document.getElementById('t-age-res').innerText = `Calculated Age: ${Math.abs(new Date(diff).getUTCFullYear() - 1970)} years`; }
@@ -466,9 +599,21 @@ function runToolAction(action) {
   else if(action==='temp') { let c=parseFloat(document.getElementById('t-temp').value); document.getElementById('t-temp-res').innerText = isNaN(c)? 'Enter celsius' : `${(c*9/5+32).toFixed(1)} °F`; }
   else if(action==='token') { document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); }
   else if(action==='spk') { showNotification('Speaking: ' + document.getElementById('t-spk').value); }
-  else if(action==='wifi') { showNotification('WiFi QR Ready for: ' + document.getElementById('t-wf').value); }
-  else if(action==='email') { showNotification('Email QR Ready!'); }
-  else if(action==='sms') { showNotification('SMS QR Ready!'); }
+  else if(action==='wifi') { 
+    let box = document.getElementById('t-wifi-box'); box.innerHTML = '';
+    let val = document.getElementById('t-wf').value;
+    if(val) { new QRCode(box, { text: `WIFI:S:${val};T:WPA;;`, width: 100, height: 100 }); showNotification('WiFi QR Generated!'); }
+  }
+  else if(action==='email') { 
+    let box = document.getElementById('t-email-box'); box.innerHTML = '';
+    let val = document.getElementById('t-em').value;
+    if(val) { new QRCode(box, { text: `mailto:${val}`, width: 100, height: 100 }); showNotification('Email QR Generated!'); }
+  }
+  else if(action==='sms') { 
+    let box = document.getElementById('t-sms-box'); box.innerHTML = '';
+    let val = document.getElementById('t-sm').value;
+    if(val) { new QRCode(box, { text: `sms:${val}`, width: 100, height: 100 }); showNotification('SMS QR Generated!'); }
+  }
 }
 </script>
 </body>
