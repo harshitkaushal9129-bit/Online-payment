@@ -15,11 +15,12 @@
 body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content:center;align-items:center;color:var(--text-main);transition:background 0.3s ease;}
 .app-shell{width:100%;max-width:450px;height:100vh;max-height:890px;background-color:var(--card-bg);border-radius:36px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);display:flex;flex-direction:column;overflow:hidden;position:relative;border:6px solid rgba(255,255,255,0.2);transition:background-color 0.3s;}
 @media(max-width:480px){.app-shell{height:100vh;max-height:none;border-radius:0;border:none;box-shadow:none;}}
-.app-header{background:linear-gradient(135deg,#ff6b00 0%,#ff8c00 100%);color:white;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom-left-radius:24px;border-bottom-right-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
-.app-header h1{font-size:16px;font-weight:800;}
+.app-header{background:linear-gradient(135deg,#ff6b00 0%,#ff8c00 100%);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom-left-radius:24px;border-bottom-right-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.app-header h1{font-size:15px;font-weight:800;}
 .app-header p{font-size:10px;opacity:0.9;}
-.header-actions{display:flex;gap:5px;}
+.header-actions{display:flex;gap:6px;align-items:center;}
 .icon-btn{background:rgba(255,255,255,0.25);border:none;color:#fff;padding:6px 10px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;}
+.user-avatar-sm{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid #fff;}
 .app-body{flex:1;overflow-y:auto;padding:16px;scroll-behavior:smooth;}
 .app-body::-webkit-scrollbar{width:4px;}
 .app-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;}
@@ -43,89 +44,352 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 .app-footer{background-color:var(--card-bg);border-top:1px solid var(--border-color);padding:10px;text-align:center;font-size:10px;color:var(--text-muted);}
 .clear-btn{font-size:10px;color:#ef4444;background:none;border:none;cursor:pointer;font-weight:600;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:1000;}
-.modal-content{background:var(--card-bg);color:var(--text-main);padding:20px;border-radius:20px;width:90%;max-width:330px;box-shadow:0 10px 25px rgba(0,0,0,0.3);}
+.modal-content{background:var(--card-bg);color:var(--text-main);padding:20px;border-radius:20px;width:90%;max-width:330px;box-shadow:0 10px 25px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;}
+.auth-container{display:flex;flex-direction:column;justify-content:center;flex:1;padding:20px;}
+.auth-switch{text-align:center;margin-top:12px;font-size:11px;color:var(--text-muted);}
+.auth-switch span{color:#ff6b00;font-weight:700;cursor:pointer;}
+.captcha-box{background:var(--input-bg);padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);font-weight:bold;text-align:center;margin-bottom:6px;letter-spacing:2px;font-size:14px;}
 </style>
 </head>
 <body>
 <div class="app-shell">
-<header class="app-header">
-<div><h1>Kaushalji QR</h1><p>UPI & Smart Tracker</p></div>
-<div class="header-actions">
-<button id="topShareBtn" class="icon-btn">Share</button>
-<button id="infoBtn" class="icon-btn">Menu</button>
+
+<!-- AUTHENTICATION CONTAINER (Login / Register) -->
+<div id="authContainer" class="auth-container" style="display:none;">
+  <div style="text-align:center;margin-bottom:20px;">
+    <h2 id="authTitle" style="font-size:20px;font-weight:800;color:#ff6b00;">Welcome to Kaushalji QR</h2>
+    <p id="authSubtitle" style="font-size:11px;color:var(--text-muted);">Please login to access your secure tracker</p>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm">
+    <div class="form-group">
+      <label class="form-label">Gmail / Mobile Number</label>
+      <input type="text" id="loginUser" class="form-input" required placeholder="Enter email or mobile">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" id="loginPass" class="form-input" required placeholder="••••••••">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Captcha Verification</label>
+      <div id="loginCaptchaDisplay" class="captcha-box"></div>
+      <input type="text" id="loginCaptchaInput" class="form-input" required placeholder="Enter captcha result">
+    </div>
+    <button type="submit" class="btn-primary">Secure Login</button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form id="registerForm" style="display:none;">
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input type="text" id="regName" class="form-input" required placeholder="Your Name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Gmail / Mobile Number</label>
+      <input type="text" id="regUser" class="form-input" required placeholder="email@gmail.com or mobile">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Create Password</label>
+      <input type="password" id="regPass" class="form-input" required placeholder="••••••••">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Profile Picture (Image)</label>
+      <input type="file" id="regPic" class="form-input" accept="image/*" required style="padding:6px;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Captcha Verification</label>
+      <div id="regCaptchaDisplay" class="captcha-box"></div>
+      <input type="text" id="regCaptchaInput" class="form-input" required placeholder="Enter captcha result">
+    </div>
+    <button type="submit" class="btn-primary">Register Account</button>
+  </form>
+
+  <div class="auth-switch">
+    <p id="switchText">Don't have an account? <span onclick="toggleAuthMode()">Register here</span></p>
+  </div>
 </div>
-</header>
-<div class="app-body">
-<div class="stats-box">
-<span>Total Spent: <span id="totalSpent">&#8377;0</span></span>
-<span id="txCount">0 Transactions</span>
+
+<!-- MAIN APP CONTAINER -->
+<div id="mainAppContainer" style="display:none;display:flex;flex-direction:column;flex:1;overflow:hidden;">
+  <header class="app-header">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img id="headerUserPic" src="" alt="Profile" class="user-avatar-sm">
+      <div><h1 id="headerUserName">Kaushalji QR</h1><p>UPI & Smart Tracker</p></div>
+    </div>
+    <div class="header-actions">
+      <button id="topShareBtn" class="icon-btn">Share</button>
+      <button id="infoBtn" class="icon-btn">Menu</button>
+    </div>
+  </header>
+  
+  <div class="app-body">
+    <div class="stats-box">
+      <span>Total Spent: <span id="totalSpent">&#8377;0</span></span>
+      <span id="txCount">0 Transactions</span>
+    </div>
+    <div class="card-panel">
+      <div class="section-title">Quick Presets</div>
+      <div class="preset-chips">
+        <div class="chip" onclick="setPreset('Tea/Coffee', 20)">☕ Chai (₹20)</div>
+        <div class="chip" onclick="setPreset('Breakfast', 100)">🥪 Nashta (₹100)</div>
+        <div class="chip" onclick="setPreset('Lunch/Dinner', 250)">🍽️ Khana (₹250)</div>
+        <div class="chip" onclick="setPreset('Petrol', 200)">⛽ Petrol (₹200)</div>
+      </div>
+      <div class="section-title">Payment Form</div>
+      <form id="upiForm">
+        <div class="form-group"><label class="form-label">UPI ID / Mobile</label><input type="text" id="upiId" class="form-input" required placeholder="9876543210@paytm"></div>
+        <div class="form-group"><label class="form-label">Amount (&#8377;)</label><input type="number" id="amount" class="form-input" step="0.01" required placeholder="0.00"></div>
+        <div class="form-group"><label class="form-label">Note</label><input type="text" id="description" class="form-input" required placeholder="Expense reason"></div>
+        <button type="submit" class="btn-primary">Generate QR Code</button>
+      </form>
+    </div>
+    <div id="qrContainer" class="card-panel qr-display-box">
+      <div class="section-title">Scan & Pay</div>
+      <div class="qr-wrapper"><div id="qrcode"></div></div>
+      <p id="qrDetails" style="font-size:11px;margin-bottom:10px;font-weight:500;"></p>
+      <button id="shareBtn" class="btn-secondary">Share Link</button>
+    </div>
+    <div class="card-panel">
+      <div class="section-title"><span>History</span><button onclick="clearHistory()" class="clear-btn">Clear All</button></div>
+      <div style="max-height:180px;overflow-y:auto;"><div id="historyList"></div></div>
+    </div>
+  </div>
+  <footer class="app-footer">Kaushalji Tools &bull; PWA Enabled</footer>
 </div>
-<div class="card-panel">
-<div class="section-title">Quick Presets</div>
-<div class="preset-chips">
-<div class="chip" onclick="setPreset('Tea/Coffee', 20)">☕ Chai (₹20)</div>
-<div class="chip" onclick="setPreset('Breakfast', 100)">🥪 Nashta (₹100)</div>
-<div class="chip" onclick="setPreset('Lunch/Dinner', 250)">🍽️ Khana (₹250)</div>
-<div class="chip" onclick="setPreset('Petrol', 200)">⛽ Petrol (₹200)</div>
-</div>
-<div class="section-title">Payment Form</div>
-<form id="upiForm">
-<div class="form-group"><label class="form-label">UPI ID / Mobile</label><input type="text" id="upiId" class="form-input" required placeholder="9876543210@paytm"></div>
-<div class="form-group"><label class="form-label">Amount (&#8377;)</label><input type="number" id="amount" class="form-input" step="0.01" required placeholder="0.00"></div>
-<div class="form-group"><label class="form-label">Note</label><input type="text" id="description" class="form-input" required placeholder="Expense reason"></div>
-<button type="submit" class="btn-primary">Generate QR Code</button>
-</form>
-</div>
-<div id="qrContainer" class="card-panel qr-display-box">
-<div class="section-title">Scan & Pay</div>
-<div class="qr-wrapper"><div id="qrcode"></div></div>
-<p id="qrDetails" style="font-size:11px;margin-bottom:10px;font-weight:500;"></p>
-<button id="shareBtn" class="btn-secondary">Share Link</button>
-</div>
-<div class="card-panel">
-<div class="section-title"><span>History</span><button onclick="clearHistory()" class="clear-btn">Clear All</button></div>
-<div style="max-height:180px;overflow-y:auto;"><div id="historyList"></div></div>
-</div>
-</div>
-<footer class="app-footer">Kaushalji Tools &bull; PWA Enabled</footer>
+
 </div>
 
 <!-- Menu / Settings Modal -->
 <div id="infoModal" class="modal-overlay">
-<div class="modal-content">
-<h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">App Settings & Support</h3>
-<div class="form-group">
-<label class="form-label">Theme Mode</label>
-<select id="themeSelector" class="form-input">
-<option value="light">☀️ Light Mode (Orange)</option>
-<option value="dark">🌙 Dark Mode</option>
-<option value="blue">🌊 Royal Blue</option>
-</select>
-</div>
-<div style="display:flex;flex-direction:column;gap:8px;margin:14px 0;">
-<a href="tel:919129191898" style="background:var(--input-bg);border:1px solid var(--border-color);padding:10px;border-radius:10px;text-decoration:none;color:var(--text-main);font-size:11px;font-weight:700;text-align:center;">📞 Support Call: +91 9129191898</a>
-<a href="https://wa.me/919129191898?text=Hello%20Kaushalji" target="_blank" style="background:#dcfce7;color:#166534;padding:10px;border-radius:10px;text-decoration:none;font-size:11px;font-weight:700;text-align:center;">💬 WhatsApp Support</a>
-<button onclick="exportData()" class="btn-secondary" style="background:#3b82f6;">📥 Export History (JSON)</button>
-</div>
-<button id="closeModal" class="btn-primary">Close Menu</button>
-</div>
+  <div class="modal-content">
+    <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">App Settings & Support</h3>
+    <div class="form-group">
+      <label class="form-label">Theme Mode</label>
+      <select id="themeSelector" class="form-input">
+        <option value="light">☀️ Light Mode (Orange)</option>
+        <option value="dark">🌙 Dark Mode</option>
+        <option value="blue">🌊 Royal Blue</option>
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:14px 0;">
+      <a href="tel:919129191898" style="background:var(--input-bg);border:1px solid var(--border-color);padding:10px;border-radius:10px;text-decoration:none;color:var(--text-main);font-size:11px;font-weight:700;text-align:center;">📞 Support Call: +91 9129191898</a>
+      <a href="https://wa.me/919129191898?text=Hello%20Kaushalji" target="_blank" style="background:#dcfce7;color:#166534;padding:10px;border-radius:10px;text-decoration:none;font-size:11px;font-weight:700;text-align:center;">💬 WhatsApp Support</a>
+      <button onclick="exportData()" class="btn-secondary" style="background:#3b82f6;">📥 Export History (JSON)</button>
+      <button onclick="logoutUser()" class="btn-secondary" style="background:#ef4444;">🔒 Logout Account</button>
+    </div>
+    <button id="closeModal" class="btn-primary">Close Menu</button>
+  </div>
 </div>
 
 <script>
-const f=document.getElementById('upiForm'),q=document.getElementById('qrContainer'),d=document.getElementById('qrcode'),dt=document.getElementById('qrDetails'),hl=document.getElementById('historyList'),sb=document.getElementById('shareBtn'),topSb=document.getElementById('topShareBtn'),infoBtn=document.getElementById('infoBtn'),infoModal=document.getElementById('infoModal'),closeModal=document.getElementById('closeModal'),themeSelector=document.getElementById('themeSelector');let inst=null,sd={};
-document.addEventListener('DOMContentLoaded',()=>{loadHistory();const savedTheme=localStorage.getItem('kaushal_theme')||'light';setTheme(savedTheme);themeSelector.value=savedTheme;});
-function setTheme(t){if(t==='light')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t);localStorage.setItem('kaushal_theme',t);}
+let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false;
+const f=document.getElementById('upiForm'),q=document.getElementById('qrContainer'),d=document.getElementById('qrcode'),dt=document.getElementById('qrDetails'),hl=document.getElementById('historyList'),sb=document.getElementById('shareBtn'),topSb=document.getElementById('topShareBtn'),infoBtn=document.getElementById('infoBtn'),infoModal=document.getElementById('infoModal'),closeModal=document.getElementById('closeModal'),themeSelector=document.getElementById('themeSelector');
+let inst=null,sd={};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const savedTheme=localStorage.getItem('kaushal_theme')||'light';
+  setTheme(savedTheme);
+  themeSelector.value=savedTheme;
+
+  checkUserSession();
+  generateCaptchas();
+});
+
+function setTheme(t){
+  if(t==='light')document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('kaushal_theme',t);
+}
 themeSelector.addEventListener('change',(e)=>setTheme(e.target.value));
-function setPreset(desc, amt){document.getElementById('description').value=desc;document.getElementById('amount').value=amt;}
-f.addEventListener('submit',e=>{e.preventDefault();const u=document.getElementById('upiId').value.trim(),a=document.getElementById('amount').value.trim(),ds=document.getElementById('description').value.trim(),now=new Date(),tStr=now.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});let fu=u.includes('@')?u:u+'@paytm',us=`upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`;d.innerHTML='';inst=new QRCode(d,{text:us,width:160,height:160});q.style.display='block';q.scrollIntoView({behavior:'smooth'});dt.innerHTML=`Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`;sd={title:'UPI Payment',text:`Pay \u20b9${a} for "${ds}". UPI: ${fu}`,url:us};saveToLocalStorage({dateTime:tStr,upiId:u,description:ds,amount:Number(a)});f.reset();loadHistory();});
+
+function generateCaptchas(){
+  let n1 = Math.floor(Math.random()*10)+1;
+  let n2 = Math.floor(Math.random()*10)+1;
+  currentCaptchaLogin = n1 + n2;
+  document.getElementById('loginCaptchaDisplay').innerText = `${n1} + ${n2} = ?`;
+
+  let r1 = Math.floor(Math.random()*10)+1;
+  let r2 = Math.floor(Math.random()*10)+1;
+  currentCaptchaReg = r1 + r2;
+  document.getElementById('regCaptchaDisplay').innerText = `${r1} + ${r2} = ?`;
+}
+
+function toggleAuthMode(){
+  isRegisterMode = !isRegisterMode;
+  if(isRegisterMode){
+    document.getElementById('authTitle').innerText = "Create Account";
+    document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments";
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`;
+  } else {
+    document.getElementById('authTitle').innerText = "Welcome to Kaushalji QR";
+    document.getElementById('authSubtitle').innerText = "Please login to access your secure tracker";
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`;
+  }
+  generateCaptchas();
+}
+
+// Register Handler
+document.getElementById('registerForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  let user = document.getElementById('regUser').value.trim();
+  let name = document.getElementById('regName').value.trim();
+  let pass = document.getElementById('regPass').value.trim();
+  let captchaInput = parseInt(document.getElementById('regCaptchaInput').value);
+  let picFile = document.getElementById('regPic').files[0];
+
+  if(captchaInput !== currentCaptchaReg){
+    alert('Invalid Captcha! Please try again.');
+    generateCaptchas();
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem('kaushal_users')) || [];
+  let existing = users.find(u => u.username === user);
+  if(existing){
+    alert('User with this Gmail/Mobile already exists!');
+    return;
+  }
+
+  let reader = new FileReader();
+  reader.onload = function(event){
+    let picDataUrl = event.target.result;
+    users.push({name: name, username: user, password: pass, pic: picDataUrl});
+    localStorage.setItem('kaushal_users', JSON.stringify(users));
+    alert('Registration successful! Please login.');
+    document.getElementById('registerForm').reset();
+    toggleAuthMode();
+  };
+  if(picFile){
+    reader.readAsDataURL(picFile);
+  }
+});
+
+// Login Handler
+document.getElementById('loginForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  let user = document.getElementById('loginUser').value.trim();
+  let pass = document.getElementById('loginPass').value.trim();
+  let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value);
+
+  if(captchaInput !== currentCaptchaLogin){
+    alert('Invalid Captcha! Please try again.');
+    generateCaptchas();
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem('kaushal_users')) || [];
+  let found = users.find(u => u.username === user && u.password === pass);
+
+  if(found){
+    localStorage.setItem('kaushal_current_user', JSON.stringify(found));
+    document.getElementById('loginForm').reset();
+    checkUserSession();
+  } else {
+    alert('Invalid credentials! Please check your ID and Password.');
+    generateCaptchas();
+  }
+});
+
+function checkUserSession(){
+  let currentUser = JSON.parse(localStorage.getItem('kaushal_current_user'));
+  if(currentUser){
+    document.getElementById('authContainer').style.display = 'none';
+    document.getElementById('mainAppContainer').style.display = 'flex';
+    document.getElementById('headerUserName').innerText = currentUser.name;
+    document.getElementById('headerUserPic').src = currentUser.pic;
+    loadHistory();
+  } else {
+    document.getElementById('authContainer').style.display = 'flex';
+    document.getElementById('mainAppContainer').style.display = 'none';
+  }
+}
+
+function logoutUser(){
+  localStorage.removeItem('kaushal_current_user');
+  infoModal.style.display = 'none';
+  checkUserSession();
+}
+
+function getActiveStorageKey(){
+  let currentUser = JSON.parse(localStorage.getItem('kaushal_current_user'));
+  return currentUser ? `upi_transactions_${currentUser.username}` : 'upi_transactions_guest';
+}
+
+function setPreset(desc, amt){
+  document.getElementById('description').value=desc;
+  document.getElementById('amount').value=amt;
+}
+
+f.addEventListener('submit',e=>{
+  e.preventDefault();
+  const u=document.getElementById('upiId').value.trim(),a=document.getElementById('amount').value.trim(),ds=document.getElementById('description').value.trim(),now=new Date(),tStr=now.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  let fu=u.includes('@')?u:u+'@paytm',us=`upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`;
+  d.innerHTML='';
+  inst=new QRCode(d,{text:us,width:160,height:160});
+  q.style.display='block';
+  q.scrollIntoView({behavior:'smooth'});
+  dt.innerHTML=`Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`;
+  sd={title:'UPI Payment',text:`Pay \u20b9${a} for "${ds}". UPI: ${fu}`,url:us};
+  saveToLocalStorage({dateTime:tStr,upiId:u,description:ds,amount:Number(a)});
+  f.reset();
+  loadHistory();
+});
+
 sb.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share(sd);}catch(e){}}else{alert('Sharing not supported.');}});
 topSb.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:'Kaushalji QR',text:'Use this UPI App',url:window.location.href});}catch(e){}}else{alert('Sharing not supported.');}});
 infoBtn.addEventListener('click',()=>infoModal.style.display='flex');
 closeModal.addEventListener('click',()=>infoModal.style.display='none');
-function saveToLocalStorage(tx){let h=JSON.parse(localStorage.getItem('upi_transactions'))||[];h.unshift(tx);localStorage.setItem('upi_transactions',JSON.stringify(h));}
-function loadHistory(){let h=JSON.parse(localStorage.getItem('upi_transactions'))||[];hl.innerHTML='';let total=0;h.forEach(item=>total+=Number(item.amount));document.getElementById('totalSpent').innerText=`₹${total.toFixed(2)}`;document.getElementById('txCount').innerText=`${h.length} Transactions`;if(h.length===0){hl.innerHTML=`<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`;return;}h.forEach(item=>{const div=document.createElement('div');div.className='history-item';div.innerHTML=`<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`;hl.appendChild(div);});}
-function clearHistory(){if(confirm('Delete all history?')){localStorage.removeItem('upi_transactions');loadHistory();}}
-function exportData(){let h=localStorage.getItem('upi_transactions')||'[]';let blob=new Blob([h],{type:'application/json'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='expense_history.json';a.click();}
+
+function saveToLocalStorage(tx){
+  let key = getActiveStorageKey();
+  let h=JSON.parse(localStorage.getItem(key))||[];
+  h.unshift(tx);
+  localStorage.setItem(key,JSON.stringify(h));
+}
+
+function loadHistory(){
+  let key = getActiveStorageKey();
+  let h=JSON.parse(localStorage.getItem(key))||[];
+  hl.innerHTML='';
+  let total=0;
+  h.forEach(item=>total+=Number(item.amount));
+  document.getElementById('totalSpent').innerText=`₹${total.toFixed(2)}`;
+  document.getElementById('txCount').innerText=`${h.length} Transactions`;
+  if(h.length===0){
+    hl.innerHTML=`<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`;
+    return;
+  }
+  h.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='history-item';
+    div.innerHTML=`<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`;
+    hl.appendChild(div);
+  });
+}
+
+function clearHistory(){
+  if(confirm('Delete all history?')){
+    let key = getActiveStorageKey();
+    localStorage.removeItem(key);
+    loadHistory();
+  }
+}
+
+function exportData(){
+  let key = getActiveStorageKey();
+  let h=localStorage.getItem(key)||'[]';
+  let blob=new Blob([h],{type:'application/json'});
+  let url=URL.createObjectURL(blob);
+  let a=document.createElement('a');
+  a.href=url;
+  a.download='expense_history.json';
+  a.click();
+}
 </script>
 </body>
 </html>
