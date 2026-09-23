@@ -62,6 +62,8 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 .header-logo{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #fff;box-shadow:0 0 10px rgba(255,255,255,0.8);}
 .header-actions{display:flex;gap:6px;align-items:center;}
 .icon-btn{background:rgba(255,255,255,0.25);border:none;color:#fff;padding:6px 10px;border-radius:10px;font-size:11px;font-weight:600;cursor:pointer;}
+.profile-btn-header{background:none;border:2px solid #fff;border-radius:50%;width:34px;height:34px;padding:0;overflow:hidden;cursor:pointer;box-shadow:0 0 8px rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;}
+.profile-btn-header img{width:100%;height:100%;object-fit:cover;}
 .app-body{flex:1;overflow-y:auto;padding:16px;scroll-behavior:smooth;}
 .app-body::-webkit-scrollbar{width:4px;}
 .app-body::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:10px;}
@@ -169,6 +171,10 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <div><h1 id="headerUserName" style="font-size:13px;">Kaushalji QR</h1><p>Smart Suite & Tracker</p></div>
     </div>
     <div class="header-actions">
+      <!-- User Profile Button with Rounded Image -->
+      <button class="profile-btn-header" onclick="openMenuModal()" title="User Profile">
+        <img id="headerProfileImg" src="Kaushalji.png" alt="Profile">
+      </button>
       <button id="topShareBtn" class="icon-btn">Share</button>
       <button id="infoBtn" class="icon-btn">Menu</button>
     </div>
@@ -304,9 +310,23 @@ let inst = null, sd = { title: 'Kaushalji UPI App', text: 'Check out this paymen
 
 function showNotification(msg) { const b = document.getElementById('customAlertBox'); document.getElementById('customAlertText').innerText = msg; b.classList.add('show'); setTimeout(() => { b.classList.remove('show'); }, 3000); }
 
-document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { try { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user && !isDemoBypassed) { try { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], pic: 'Kaushalji.png' }; } } catch(err) { currentUserData = { name: user.email.split('@')[0], pic: 'Kaushalji.png' }; } document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); } else if(!isDemoBypassed) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); } catch(err) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }, 1000); });
+document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { try { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user && !isDemoBypassed) { try { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], pic: 'Kaushalji.png' }; } } catch(err) { currentUserData = { name: user.email.split('@')[0], pic: 'Kaushalji.png' }; } updateHeaderProfilePic(); document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); } else if(!isDemoBypassed) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); } catch(err) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }, 1000); });
 
-function bypassLogin() { isDemoBypassed = true; currentUserData = { name: 'Kaushalji', pic: 'Kaushalji.png' }; document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); showNotification('Welcome to Kaushalji Suite (Demo Mode)'); }
+function bypassLogin() { 
+  isDemoBypassed = true; 
+  currentUserData = { name: 'Kaushalji', pic: 'Kaushalji.png' }; 
+  updateHeaderProfilePic();
+  document.getElementById('authContainer').style.display = 'none'; 
+  document.getElementById('mainAppContainer').style.display = 'flex'; 
+  loadHistory(); 
+  showNotification('Welcome to Kaushalji Suite (Demo Mode)'); 
+}
+
+function updateHeaderProfilePic() {
+  if (currentUserData && currentUserData.pic) {
+    document.getElementById('headerProfileImg').src = currentUserData.pic;
+  }
+}
 
 function setTheme(t) { if (t === 'light') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('kaushal_theme', t); }
 
@@ -407,6 +427,7 @@ topSb.addEventListener('click', async () => {
 });
 
 infoBtn.addEventListener('click', () => infoModal.style.display = 'flex');
+function openMenuModal() { infoModal.style.display = 'flex'; }
 
 closeModal.onclick = () => infoModal.style.display = 'none';
 
