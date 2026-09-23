@@ -7,6 +7,47 @@
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDzB333QfsMrC0kIsVR-itZaQgqSUjNJ7s",
+    authDomain: "qr-generator-and-transactions.firebaseapp.com",
+    projectId: "qr-generator-and-transactions",
+    storageBucket: "qr-generator-and-transactions.firebasestorage.app",
+    messagingSenderId: "858929128611",
+    appId: "1:858929128611:web:94e3b6797baac75f564b16",
+    measurementId: "G-RN7TM8D1MW"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  window.firebaseAuth = auth;
+  window.firebaseDb = db;
+  window.firebaseStorage = storage;
+  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+  window.signOut = signOut;
+  window.onAuthStateChanged = onAuthStateChanged;
+  window.collection = collection;
+  window.addDoc = addDoc;
+  window.getDocs = getDocs;
+  window.deleteDoc = deleteDoc;
+  window.doc = doc;
+  window.query = query;
+  window.orderBy = orderBy;
+  window.getDoc = getDoc;
+  window.setDoc = setDoc;
+  window.ref = ref;
+  window.uploadBytes = uploadBytes;
+  window.getDownloadURL = getDownloadURL;
+</script>
 <style>
 :root{--bg-gradient:radial-gradient(circle at 50% 10%,#ff8c00 0%,#e65c00 100%);--card-bg:#ffffff;--text-main:#2d3748;--text-muted:#718096;--border-color:#ffe0cc;--input-bg:#fafafa;}
 [data-theme="dark"]{--bg-gradient:radial-gradient(circle at 50% 10%,#1e293b 0%,#0f172a 100%);--card-bg:#1e293b;--text-main:#f8fafc;--text-muted:#94a3b8;--border-color:#334155;--input-bg:#0f172a;}
@@ -54,18 +95,16 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 <body>
 <div class="app-shell">
 
-<!-- AUTHENTICATION CONTAINER (Login / Register) -->
 <div id="authContainer" class="auth-container" style="display:none;">
   <div style="text-align:center;margin-bottom:20px;">
     <h2 id="authTitle" style="font-size:20px;font-weight:800;color:#ff6b00;">Welcome to Kaushalji QR</h2>
     <p id="authSubtitle" style="font-size:11px;color:var(--text-muted);">Please login to access your secure tracker</p>
   </div>
 
-  <!-- LOGIN FORM -->
   <form id="loginForm">
     <div class="form-group">
-      <label class="form-label">Gmail / Mobile Number</label>
-      <input type="text" id="loginUser" class="form-input" required placeholder="Enter email or mobile">
+      <label class="form-label">Email Address</label>
+      <input type="email" id="loginUser" class="form-input" required placeholder="Enter email">
     </div>
     <div class="form-group">
       <label class="form-label">Password</label>
@@ -79,15 +118,14 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
     <button type="submit" class="btn-primary">Secure Login</button>
   </form>
 
-  <!-- REGISTER FORM -->
   <form id="registerForm" style="display:none;">
     <div class="form-group">
       <label class="form-label">Full Name</label>
       <input type="text" id="regName" class="form-input" required placeholder="Your Name">
     </div>
     <div class="form-group">
-      <label class="form-label">Gmail / Mobile Number</label>
-      <input type="text" id="regUser" class="form-input" required placeholder="email@gmail.com or mobile">
+      <label class="form-label">Email Address</label>
+      <input type="email" id="regUser" class="form-input" required placeholder="email@gmail.com">
     </div>
     <div class="form-group">
       <label class="form-label">Create Password</label>
@@ -110,8 +148,7 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   </div>
 </div>
 
-<!-- MAIN APP CONTAINER -->
-<div id="mainAppContainer" style="display:none;display:flex;flex-direction:column;flex:1;overflow:hidden;">
+<div id="mainAppContainer" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
   <header class="app-header">
     <div style="display:flex;align-items:center;gap:10px;">
       <img id="headerUserPic" src="" alt="Profile" class="user-avatar-sm">
@@ -160,7 +197,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 
 </div>
 
-<!-- Menu / Settings Modal -->
 <div id="infoModal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">App Settings & Support</h3>
@@ -183,213 +219,45 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 </div>
 
 <script>
-let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false;
-const f=document.getElementById('upiForm'),q=document.getElementById('qrContainer'),d=document.getElementById('qrcode'),dt=document.getElementById('qrDetails'),hl=document.getElementById('historyList'),sb=document.getElementById('shareBtn'),topSb=document.getElementById('topShareBtn'),infoBtn=document.getElementById('infoBtn'),infoModal=document.getElementById('infoModal'),closeModal=document.getElementById('closeModal'),themeSelector=document.getElementById('themeSelector');
-let inst=null,sd={};
+let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false, currentUserData = null;
+const f = document.getElementById('upiForm'), q = document.getElementById('qrContainer'), d = document.getElementById('qrcode'), dt = document.getElementById('qrDetails'), hl = document.getElementById('historyList'), sb = document.getElementById('shareBtn'), topSb = document.getElementById('topShareBtn'), infoBtn = document.getElementById('infoBtn'), infoModal = document.getElementById('infoModal'), closeModal = document.getElementById('closeModal'), themeSelector = document.getElementById('themeSelector');
+let inst = null, sd = {};
 
-document.addEventListener('DOMContentLoaded',()=>{
-  const savedTheme=localStorage.getItem('kaushal_theme')||'light';
-  setTheme(savedTheme);
-  themeSelector.value=savedTheme;
+document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user) { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], pic: 'https://via.placeholder.com/150' }; } document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; document.getElementById('headerUserName').innerText = currentUserData.name; document.getElementById('headerUserPic').src = currentUserData.pic; loadHistory(); } else { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); }, 1000); });
 
-  checkUserSession();
-  generateCaptchas();
-});
+function setTheme(t) { if (t === 'light') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('kaushal_theme', t); }
 
-function setTheme(t){
-  if(t==='light')document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme',t);
-  localStorage.setItem('kaushal_theme',t);
-}
-themeSelector.addEventListener('change',(e)=>setTheme(e.target.value));
+themeSelector.addEventListener('change', (e) => setTheme(e.target.value));
 
-function generateCaptchas(){
-  let n1 = Math.floor(Math.random()*10)+1;
-  let n2 = Math.floor(Math.random()*10)+1;
-  currentCaptchaLogin = n1 + n2;
-  document.getElementById('loginCaptchaDisplay').innerText = `${n1} + ${n2} = ?`;
+function generateCaptchas() { let n1 = Math.floor(Math.random() * 10) + 1; let n2 = Math.floor(Math.random() * 10) + 1; currentCaptchaLogin = n1 + n2; document.getElementById('loginCaptchaDisplay').innerText = `${n1} + ${n2} = ?`; let r1 = Math.floor(Math.random() * 10) + 1; let r2 = Math.floor(Math.random() * 10) + 1; currentCaptchaReg = r1 + r2; document.getElementById('regCaptchaDisplay').innerText = `${r1} + ${r2} = ?`; }
 
-  let r1 = Math.floor(Math.random()*10)+1;
-  let r2 = Math.floor(Math.random()*10)+1;
-  currentCaptchaReg = r1 + r2;
-  document.getElementById('regCaptchaDisplay').innerText = `${r1} + ${r2} = ?`;
-}
+function toggleAuthMode() { isRegisterMode = !isRegisterMode; if (isRegisterMode) { document.getElementById('authTitle').innerText = "Create Account"; document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments"; document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`; } else { document.getElementById('authTitle').innerText = "Welcome to Kaushalji QR"; document.getElementById('authSubtitle').innerText = "Please login to access your secure tracker"; document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`; } generateCaptchas(); }
 
-function toggleAuthMode(){
-  isRegisterMode = !isRegisterMode;
-  if(isRegisterMode){
-    document.getElementById('authTitle').innerText = "Create Account";
-    document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments";
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-    document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`;
-  } else {
-    document.getElementById('authTitle').innerText = "Welcome to Kaushalji QR";
-    document.getElementById('authSubtitle').innerText = "Please login to access your secure tracker";
-    document.getElementById('loginForm').style.display = 'block';
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`;
-  }
-  generateCaptchas();
-}
+document.getElementById('registerForm').addEventListener('submit', async function(e) { e.preventDefault(); let userEmail = document.getElementById('regUser').value.trim(); let name = document.getElementById('regName').value.trim(); let pass = document.getElementById('regPass').value.trim(); let captchaInput = parseInt(document.getElementById('regCaptchaInput').value); let picFile = document.getElementById('regPic').files[0]; if (captchaInput !== currentCaptchaReg) { alert('Invalid Captcha! Please try again.'); generateCaptchas(); return; } try { let userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, userEmail, pass); let user = userCredential.user; let storageRef = window.ref(window.firebaseStorage, `profile_pics/${user.uid}`); await window.uploadBytes(storageRef, picFile); let picUrl = await window.getDownloadURL(storageRef); await window.setDoc(window.doc(window.firebaseDb, "users", user.uid), { name: name, email: userEmail, pic: picUrl }); alert('Registration successful!'); document.getElementById('registerForm').reset(); toggleAuthMode(); } catch (error) { alert('Error: ' + error.message); generateCaptchas(); } });
 
-// Register Handler
-document.getElementById('registerForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  let user = document.getElementById('regUser').value.trim();
-  let name = document.getElementById('regName').value.trim();
-  let pass = document.getElementById('regPass').value.trim();
-  let captchaInput = parseInt(document.getElementById('regCaptchaInput').value);
-  let picFile = document.getElementById('regPic').files[0];
+document.getElementById('loginForm').addEventListener('submit', async function(e) { e.preventDefault(); let userEmail = document.getElementById('loginUser').value.trim(); let pass = document.getElementById('loginPass').value.trim(); let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value); if (captchaInput !== currentCaptchaLogin) { alert('Invalid Captcha! Please try again.'); generateCaptchas(); return; } try { await window.signInWithEmailAndPassword(window.firebaseAuth, userEmail, pass); document.getElementById('loginForm').reset(); } catch (error) { alert('Invalid credentials or error: ' + error.message); generateCaptchas(); } });
 
-  if(captchaInput !== currentCaptchaReg){
-    alert('Invalid Captcha! Please try again.');
-    generateCaptchas();
-    return;
-  }
+async function logoutUser() { try { await window.signOut(window.firebaseAuth); infoModal.style.display = 'none'; } catch (error) { console.error('Logout error', error); } }
 
-  let users = JSON.parse(localStorage.getItem('kaushal_users')) || [];
-  let existing = users.find(u => u.username === user);
-  if(existing){
-    alert('User with this Gmail/Mobile already exists!');
-    return;
-  }
+function setPreset(desc, amt) { document.getElementById('description').value = desc; document.getElementById('amount').value = amt; }
 
-  let reader = new FileReader();
-  reader.onload = function(event){
-    let picDataUrl = event.target.result;
-    users.push({name: name, username: user, password: pass, pic: picDataUrl});
-    localStorage.setItem('kaushal_users', JSON.stringify(users));
-    alert('Registration successful! Please login.');
-    document.getElementById('registerForm').reset();
-    toggleAuthMode();
-  };
-  if(picFile){
-    reader.readAsDataURL(picFile);
-  }
-});
+f.addEventListener('submit', async e => { e.preventDefault(); const u = document.getElementById('upiId').value.trim(), a = document.getElementById('amount').value.trim(), ds = document.getElementById('description').value.trim(), now = new Date(), tStr = now.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); let fu = u.includes('@') ? u : u + '@paytm', us = `upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`; d.innerHTML = ''; inst = new QRCode(d, { text: us, width: 160, height: 160 }); q.style.display = 'block'; q.scrollIntoView({ behavior: 'smooth' }); dt.innerHTML = `Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`; sd = { title: 'UPI Payment', text: `Pay \u20b9${a} for "${ds}". UPI: ${fu}`, url: us }; await saveToFirestore({ dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() }); f.reset(); loadHistory(); });
 
-// Login Handler
-document.getElementById('loginForm').addEventListener('submit', function(e){
-  e.preventDefault();
-  let user = document.getElementById('loginUser').value.trim();
-  let pass = document.getElementById('loginPass').value.trim();
-  let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value);
+sb.addEventListener('click', async () => { if (navigator.share) { try { await navigator.share(sd); } catch (e) {} } else { alert('Sharing not supported.'); } });
 
-  if(captchaInput !== currentCaptchaLogin){
-    alert('Invalid Captcha! Please try again.');
-    generateCaptchas();
-    return;
-  }
+topSb.addEventListener('click', async () => { if (navigator.share) { try { await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); } catch (e) {} } else { alert('Sharing not supported.'); } });
 
-  let users = JSON.parse(localStorage.getItem('kaushal_users')) || [];
-  let found = users.find(u => u.username === user && u.password === pass);
+infoBtn.addEventListener('click', () => infoModal.style.display = 'flex');
 
-  if(found){
-    localStorage.setItem('kaushal_current_user', JSON.stringify(found));
-    document.getElementById('loginForm').reset();
-    checkUserSession();
-  } else {
-    alert('Invalid credentials! Please check your ID and Password.');
-    generateCaptchas();
-  }
-});
+closeModal.onclick = () => infoModal.style.display = 'none';
 
-function checkUserSession(){
-  let currentUser = JSON.parse(localStorage.getItem('kaushal_current_user'));
-  if(currentUser){
-    document.getElementById('authContainer').style.display = 'none';
-    document.getElementById('mainAppContainer').style.display = 'flex';
-    document.getElementById('headerUserName').innerText = currentUser.name;
-    document.getElementById('headerUserPic').src = currentUser.pic;
-    loadHistory();
-  } else {
-    document.getElementById('authContainer').style.display = 'flex';
-    document.getElementById('mainAppContainer').style.display = 'none';
-  }
-}
+async function saveToFirestore(tx) { let user = window.firebaseAuth.currentUser; if (user) { try { await window.addDoc(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), tx); } catch (err) { console.error("Error saving transaction:", err); } } }
 
-function logoutUser(){
-  localStorage.removeItem('kaushal_current_user');
-  infoModal.style.display = 'none';
-  checkUserSession();
-}
+async function loadHistory() { let user = window.firebaseAuth.currentUser; if (!user) return; try { const qRef = window.query(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), window.orderBy('timestamp', 'desc')); const querySnapshot = await window.getDocs(qRef); hl.innerHTML = ''; let total = 0; let count = 0; querySnapshot.forEach(docSnap => { let item = docSnap.data(); total += Number(item.amount); count++; const div = document.createElement('div'); div.className = 'history-item'; div.innerHTML = `<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`; hl.appendChild(div); }); document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; document.getElementById('txCount').innerText = `${count} Transactions`; if (count === 0) { hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; } } catch (err) { console.error("Error loading history:", err); } }
 
-function getActiveStorageKey(){
-  let currentUser = JSON.parse(localStorage.getItem('kaushal_current_user'));
-  return currentUser ? `upi_transactions_${currentUser.username}` : 'upi_transactions_guest';
-}
+async function clearHistory() { if (confirm('Delete all online history?')) { let user = window.firebaseAuth.currentUser; if (user) { try { const querySnapshot = await window.getDocs(window.collection(window.firebaseDb, `users/${user.uid}/transactions`)); let deletions = querySnapshot.docs.map(dSnap => window.deleteDoc(window.doc(window.firebaseDb, `users/${user.uid}/transactions`, dSnap.id))); await Promise.all(deletions); loadHistory(); } catch (err) { alert('Error clearing history: ' + err.message); } } } }
 
-function setPreset(desc, amt){
-  document.getElementById('description').value=desc;
-  document.getElementById('amount').value=amt;
-}
-
-f.addEventListener('submit',e=>{
-  e.preventDefault();
-  const u=document.getElementById('upiId').value.trim(),a=document.getElementById('amount').value.trim(),ds=document.getElementById('description').value.trim(),now=new Date(),tStr=now.toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
-  let fu=u.includes('@')?u:u+'@paytm',us=`upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`;
-  d.innerHTML='';
-  inst=new QRCode(d,{text:us,width:160,height:160});
-  q.style.display='block';
-  q.scrollIntoView({behavior:'smooth'});
-  dt.innerHTML=`Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`;
-  sd={title:'UPI Payment',text:`Pay \u20b9${a} for "${ds}". UPI: ${fu}`,url:us};
-  saveToLocalStorage({dateTime:tStr,upiId:u,description:ds,amount:Number(a)});
-  f.reset();
-  loadHistory();
-});
-
-sb.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share(sd);}catch(e){}}else{alert('Sharing not supported.');}});
-topSb.addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:'Kaushalji QR',text:'Use this UPI App',url:window.location.href});}catch(e){}}else{alert('Sharing not supported.');}});
-infoBtn.addEventListener('click',()=>infoModal.style.display='flex');
-closeModal.addEventListener('click',()=>infoModal.style.display='none');
-
-function saveToLocalStorage(tx){
-  let key = getActiveStorageKey();
-  let h=JSON.parse(localStorage.getItem(key))||[];
-  h.unshift(tx);
-  localStorage.setItem(key,JSON.stringify(h));
-}
-
-function loadHistory(){
-  let key = getActiveStorageKey();
-  let h=JSON.parse(localStorage.getItem(key))||[];
-  hl.innerHTML='';
-  let total=0;
-  h.forEach(item=>total+=Number(item.amount));
-  document.getElementById('totalSpent').innerText=`₹${total.toFixed(2)}`;
-  document.getElementById('txCount').innerText=`${h.length} Transactions`;
-  if(h.length===0){
-    hl.innerHTML=`<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`;
-    return;
-  }
-  h.forEach(item=>{
-    const div=document.createElement('div');
-    div.className='history-item';
-    div.innerHTML=`<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`;
-    hl.appendChild(div);
-  });
-}
-
-function clearHistory(){
-  if(confirm('Delete all history?')){
-    let key = getActiveStorageKey();
-    localStorage.removeItem(key);
-    loadHistory();
-  }
-}
-
-function exportData(){
-  let key = getActiveStorageKey();
-  let h=localStorage.getItem(key)||'[]';
-  let blob=new Blob([h],{type:'application/json'});
-  let url=URL.createObjectURL(blob);
-  let a=document.createElement('a');
-  a.href=url;
-  a.download='expense_history.json';
-  a.click();
-}
+async function exportData() { let user = window.firebaseAuth.currentUser; if (!user) return; try { const querySnapshot = await window.getDocs(window.collection(window.firebaseDb, `users/${user.uid}/transactions`)); let h = []; querySnapshot.forEach(docSnap => h.push(docSnap.data())); let blob = new Blob([JSON.stringify(h, null, 2)], { type: 'application/json' }); let url = URL.createObjectURL(blob); let a = document.createElement('a'); a.href = url; a.download = 'expense_history.json'; a.click(); } catch (err) { alert('Export error: ' + err.message); } }
 </script>
 </body>
 </html>
