@@ -258,7 +258,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
         <button id="saveQrBtn" class="btn-secondary" style="background:#3b82f6;flex:1;">💾 Save QR Image</button>
         <button id="shareBtn" class="btn-secondary" style="flex:1;">🔗 Share Link</button>
       </div>
-      <!-- Added extra button to manually save QR to history if needed -->
       <button onclick="manualSaveToHistory()" class="btn-secondary" style="background:#f97316;width:100%;">➕ Save QR Data to History</button>
     </div>
 
@@ -272,7 +271,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 
 </div>
 
-<!-- User Profile Details Modal Div with Registration Date -->
 <div id="userProfileModal" class="modal-overlay">
   <div class="modal-content" style="text-align:center;">
     <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;color:#ff6b00;">User Profile Details</h3>
@@ -291,7 +289,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   </div>
 </div>
 
-<!-- Universal Tool Modal -->
 <div id="toolModal" class="modal-overlay">
   <div class="modal-content">
     <h3 id="toolModalTitle" style="font-size:14px;font-weight:800;margin-bottom:12px;">Tool Utility</h3>
@@ -300,7 +297,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   </div>
 </div>
 
-<!-- Menu / Settings Modal -->
 <div id="infoModal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">App Settings & Support</h3>
@@ -409,7 +405,7 @@ function toggleToolsHub() {
   }
 }
 
-// Automatically save QR data to history on generation
+// QR Generation with Loader Effect & Auto-Save
 f.addEventListener('submit', async e => { 
   e.preventDefault(); 
   const u = document.getElementById('upiId').value.trim(), 
@@ -420,53 +416,81 @@ f.addEventListener('submit', async e => {
   let fu = u.includes('@') ? u : u + '@paytm', 
       us = `upi://pay?pa=${encodeURIComponent(fu)}&am=${encodeURIComponent(a)}&tn=${encodeURIComponent(ds)}&cu=INR`; 
   
-  d.innerHTML = ''; 
-  inst = new QRCode(d, { text: us, width: 160, height: 160 }); 
-  q.style.display = 'block'; 
-  q.scrollIntoView({ behavior: 'smooth' }); 
-  dt.innerHTML = `Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`; 
-  
-  sd = { title: 'UPI Payment', text: `Pay \u20b9${a} for "${ds}". UPI: ${fu}`, url: us }; 
-  
-  lastGeneratedTx = { dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() };
-  
-  // Automatic saving upon generating QR
-  await saveToFirestore(lastGeneratedTx); 
-  loadHistory(); 
-  f.reset(); 
-  showNotification('QR Generated & Auto-Saved to History!'); 
+  const submitBtn = f.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerText;
+  submitBtn.innerText = "Generating QR...";
+  submitBtn.disabled = true;
+
+  setTimeout(async () => {
+    d.innerHTML = ''; 
+    inst = new QRCode(d, { text: us, width: 160, height: 160 }); 
+    q.style.display = 'block'; 
+    q.scrollIntoView({ behavior: 'smooth' }); 
+    dt.innerHTML = `Paying <strong>&#8377;${a}</strong> to <strong>${u}</strong>`; 
+    
+    sd = { title: 'UPI Payment', text: `Pay \u20b9${a} for "${ds}". UPI: ${fu}`, url: us }; 
+    
+    lastGeneratedTx = { dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() };
+    
+    await saveToFirestore(lastGeneratedTx); 
+    loadHistory(); 
+    
+    submitBtn.innerText = originalText;
+    submitBtn.disabled = false;
+    f.reset(); 
+    showNotification('QR Generated & Stored Successfully!'); 
+  }, 500);
 });
 
+// Manual Save to History Button with Loader Effect
 async function manualSaveToHistory() {
-  if(lastGeneratedTx) {
-    await saveToFirestore(lastGeneratedTx);
-    loadHistory();
-    showNotification('QR Data manually saved to history again!');
+  if (lastGeneratedTx) {
+    const manualBtn = event.target;
+    const originalBtnText = manualBtn.innerText;
+    manualBtn.innerText = "Saving to History...";
+    manualBtn.disabled = true;
+
+    setTimeout(async () => {
+      await saveToFirestore(lastGeneratedTx);
+      loadHistory();
+      showNotification('QR Data successfully saved to history!');
+      manualBtn.innerText = originalBtnText;
+      manualBtn.disabled = false;
+    }, 500);
   } else {
     showNotification('Please generate a QR code first.');
   }
 }
 
+// Save QR Image Button with Loader Effect
 saveQrBtn.addEventListener('click', () => {
-  const imgEl = d.querySelector('img');
-  const canvasEl = d.querySelector('canvas');
-  let imageUrl = '';
-  if (imgEl && imgEl.src) {
-    imageUrl = imgEl.src;
-  } else if (canvasEl) {
-    imageUrl = canvasEl.toDataURL('image/png');
-  }
-  if (imageUrl) {
-    const link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = 'Kaushalji-UPI-QR.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showNotification('QR Code Image Saved Successfully!');
-  } else {
-    showNotification('QR Code not found to save.');
-  }
+  saveQrBtn.innerText = "Saving Image...";
+  saveQrBtn.disabled = true;
+
+  setTimeout(() => {
+    const imgEl = d.querySelector('img');
+    const canvasEl = d.querySelector('canvas');
+    let imageUrl = '';
+    if (imgEl && imgEl.src) {
+      imageUrl = imgEl.src;
+    } else if (canvasEl) {
+      imageUrl = canvasEl.toDataURL('image/png');
+    }
+    
+    if (imageUrl) {
+      const link = document.createElement('a');
+      link.href = imageUrl;
+      link.download = 'Kaushalji-UPI-QR.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showNotification('QR Code Image Saved Successfully!');
+    } else {
+      showNotification('Please generate a QR code first.');
+    }
+    saveQrBtn.innerText = "💾 Save QR Image";
+    saveQrBtn.disabled = false;
+  }, 500);
 });
 
 sb.addEventListener('click', async () => { 
@@ -499,12 +523,18 @@ async function saveToFirestore(tx) {
   if (user && !isDemoBypassed) { 
     try { 
       await window.addDoc(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), tx); 
-    } catch (err) { console.error("Error saving transaction:", err); } 
+    } catch (err) { 
+      fallbackLocalStorageSave(tx);
+    } 
   } else { 
-    let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
-    localTx.unshift(tx); 
-    localStorage.setItem('kaushal_local_tx', JSON.stringify(localTx)); 
+    fallbackLocalStorageSave(tx);
   } 
+}
+
+function fallbackLocalStorageSave(tx) {
+  let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
+  localTx.unshift(tx); 
+  localStorage.setItem('kaushal_local_tx', JSON.stringify(localTx));
 }
 
 async function loadHistory() { 
@@ -626,21 +656,6 @@ function openToolModal(type) {
   else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;"><button onclick="runToolAction('temp')" class="btn-secondary">Convert to Fahrenheit</button><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Fetch Live Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
   else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Say something" style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary">Speak Text</button>`; }
-  else if(type==='qrwifi') { 
-    let box = document.getElementById('t-wifi-box'); box.innerHTML = '';
-    let val = document.getElementById('t-wf').value;
-    if(val) { new QRCode(box, { text: `WIFI:S:${val};T:WPA;;`, width: 100, height: 100 }); showNotification('WiFi QR Generated!'); }
-  }
-  else if(type==='qremail') { 
-    let box = document.getElementById('t-email-box'); box.innerHTML = '';
-    let val = document.getElementById('t-em').value;
-    if(val) { new QRCode(box, { text: `mailto:${val}`, width: 100, height: 100 }); showNotification('Email QR Generated!'); }
-  }
-  else if(type==='qrsms') { 
-    let box = document.getElementById('t-sms-box'); box.innerHTML = '';
-    let val = document.getElementById('t-sm').value;
-    if(val) { new QRCode(box, { text: `sms:${val}`, width: 100, height: 100 }); showNotification('SMS QR Generated!'); }
-  }
 }
 
 function closeToolModal() { document.getElementById('toolModal').style.display = 'none'; }
@@ -693,21 +708,6 @@ function runToolAction(action) {
   else if(action==='temp') { let c=parseFloat(document.getElementById('t-temp').value); document.getElementById('t-temp-res').innerText = isNaN(c)? 'Enter celsius' : `${(c*9/5+32).toFixed(1)} °F`; }
   else if(action==='token') { document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); }
   else if(action==='spk') { showNotification('Speaking: ' + document.getElementById('t-spk').value); }
-  else if(type==='wifi') { 
-    let box = document.getElementById('t-wifi-box'); box.innerHTML = '';
-    let val = document.getElementById('t-wf').value;
-    if(val) { new QRCode(box, { text: `WIFI:S:${val};T:WPA;;`, width: 100, height: 100 }); showNotification('WiFi QR Generated!'); }
-  }
-  else if(type==='qremail') { 
-    let box = document.getElementById('t-email-box'); box.innerHTML = '';
-    let val = document.getElementById('t-em').value;
-    if(val) { new QRCode(box, { text: `mailto:${val}`, width: 100, height: 100 }); showNotification('Email QR Generated!'); }
-  }
-  else if(type==='qrsms') { 
-    let box = document.getElementById('t-sms-box'); box.innerHTML = '';
-    let val = document.getElementById('t-sm').value;
-    if(val) { new QRCode(box, { text: `sms:${val}`, width: 100, height: 100 }); showNotification('SMS QR Generated!'); }
-  }
 }
 </script>
 </body>
