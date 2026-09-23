@@ -195,7 +195,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
         <span>📂</span> <span id="toggleHubText">Open 60+ Smart Tools Hub</span> <span>▼</span>
       </button>
       <div id="toolsGridContainer" class="tools-grid">
-        <!-- Original & New Fully Functional Tools -->
         <div class="tool-icon-btn" onclick="openToolModal('qr')"><span>🔲</span>QR Gen</div>
         <div class="tool-icon-btn" onclick="openToolModal('pass')"><span>🔐</span>Pass Gen</div>
         <div class="tool-icon-btn" onclick="openToolModal('bmi')"><span>⚖️</span>BMI Calc</div>
@@ -236,7 +235,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
         <div class="tool-icon-btn" onclick="openToolModal('qrwifi')"><span>🛜</span>WiFi QR</div>
         <div class="tool-icon-btn" onclick="openToolModal('qremail')"><span>✉️</span>Email QR</div>
         <div class="tool-icon-btn" onclick="openToolModal('qrsms')"><span>💬</span>SMS QR</div>
-        <!-- 20+ Additional Fully Functional Tools -->
         <div class="tool-icon-btn" onclick="openToolModal('lunar')"><span>🌙</span>Age Planet</div>
         <div class="tool-icon-btn" onclick="openToolModal('water')"><span>💧</span>Water Calc</div>
         <div class="tool-icon-btn" onclick="openToolModal('compound')"><span>📈</span>C.Interest</div>
@@ -326,7 +324,7 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   </div>
 </div>
 
-<!-- INFO / SETTINGS MODAL (With Explicit Logout Button) -->
+<!-- INFO / SETTINGS MODAL -->
 <div id="infoModal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">App Settings & Support</h3>
@@ -533,7 +531,6 @@ function toggleToolsHub() {
   }
 }
 
-// QR Generation with Loader Effect & Auto-Save
 f.addEventListener('submit', async e => { 
   e.preventDefault(); 
   const u = document.getElementById('upiId').value.trim(), 
@@ -725,12 +722,9 @@ async function exportData() {
   showNotification('History exported successfully!'); 
 }
 
-// FULLY FUNCTIONAL TOOLS MODAL HANDLER (Including Camera QR Scanner & 20+ additions)
 function openToolModal(type) {
   const m = document.getElementById('toolModal'), t = document.getElementById('toolModalTitle'), b = document.getElementById('toolModalBody');
   m.style.display = 'flex';
-  
-  // Stop any active camera stream if switching away
   stopCameraScanner();
 
   if(type==='qr') { 
@@ -757,8 +751,6 @@ function openToolModal(type) {
   else if(type==='currency') { t.innerText='Currency Converter (INR to USD)'; b.innerHTML=`<input type="number" id="t-inr" class="form-input" placeholder="Amount in INR" style="margin-bottom:6px;"><button onclick="runToolAction('curr')" class="btn-secondary">Convert to USD</button><div id="t-curr-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='speedtest') { t.innerText='Ping Latency Test'; b.innerHTML=`<button onclick="runToolAction('speed')" class="btn-secondary">Test Connection Ping</button><div id="t-speed-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
   else if(type==='json') { t.innerText='JSON Formatter Validator'; b.innerHTML=`<input type="text" id="t-json" class="form-input" placeholder='{"name":"Kaushalji"}' style="margin-bottom:6px;"><button onclick="runToolAction('json')" class="btn-secondary">Validate JSON</button><div id="t-json-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  
-  // Fully Functional Real Camera QR Scanner using HTML5 Video + jsQR
   else if(type==='qrscan') { 
     t.innerText='Live Camera QR Scanner'; 
     b.innerHTML=`
@@ -769,7 +761,6 @@ function openToolModal(type) {
         <div id="t-qscan-res" style="margin-top:10px;font-weight:bold;word-break:break-all;background:var(--input-bg);padding:8px;border-radius:8px;">Camera inactive</div>
       </div>`; 
   }
-  
   else if(type==='gst') { t.innerText='GST Calculator (18%)'; b.innerHTML=`<input type="number" id="t-gst" class="form-input" placeholder="Base Amount" style="margin-bottom:6px;"><button onclick="runToolAction('gst')" class="btn-secondary">Calculate GST</button><div id="t-gst-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='battery') { t.innerText='Battery Status Tool'; b.innerHTML=`<button onclick="runToolAction('batt')" class="btn-secondary">Check Device Battery</button><div id="t-batt-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click to inspect</div>`; }
   else if(type==='netinfo') { t.innerText='Network Status Tool'; b.innerHTML=`<button onclick="runToolAction('net')" class="btn-secondary">Check Online Status</button><div id="t-net-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
@@ -785,8 +776,6 @@ function openToolModal(type) {
   else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;"><button onclick="runToolAction('temp')" class="btn-secondary">Convert to Fahrenheit</button><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Fetch Live Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
   else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Say something" style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary">Speak Text</button>`; }
-  
-  // 20+ Added New Functional Tools Handlers
   else if(type==='lunar') { t.innerText='Age on Planet Mars/Moon'; b.innerHTML=`<input type="number" id="t-lunar-age" class="form-input" placeholder="Your Earth Age in Years" style="margin-bottom:6px;"><button onclick="runToolAction('lunar')" class="btn-secondary">Calculate Space Age</button><div id="t-lunar-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='water') { t.innerText='Daily Water Intake'; b.innerHTML=`<input type="number" id="t-water-wt" class="form-input" placeholder="Weight in kg" style="margin-bottom:6px;"><button onclick="runToolAction('water')" class="btn-secondary">Calculate Water</button><div id="t-water-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='compound') { t.innerText='Compound Interest'; b.innerHTML=`<input type="number" id="t-ci-p" class="form-input" placeholder="Principal ₹" style="margin-bottom:4px;"><input type="number" id="t-ci-r" class="form-input" placeholder="Rate %" style="margin-bottom:4px;"><input type="number" id="t-ci-t" class="form-input" placeholder="Years" style="margin-bottom:6px;"><button onclick="runToolAction('compound')" class="btn-secondary">Calculate Return</button><div id="t-ci-res" style="margin-top:10px;font-weight:bold;"></div>`; }
@@ -909,8 +898,6 @@ function runToolAction(action) {
   else if(action==='temp') { let c=parseFloat(document.getElementById('t-temp').value); document.getElementById('t-temp-res').innerText = isNaN(c)? 'Enter celsius' : `${(c*9/5+32).toFixed(1)} °F`; }
   else if(action==='token') { document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); }
   else if(action==='spk') { showNotification('Speaking: ' + document.getElementById('t-spk').value); }
-  
-  // 20+ Additional New Features Logic Handlers
   else if(action==='lunar') { let ag=parseFloat(document.getElementById('t-lunar-age').value); document.getElementById('t-lunar-res').innerText = isNaN(ag)? 'Enter age' : `Age on Mars: ${(ag/1.88).toFixed(1)} yrs | On Moon: ${ag} yrs`; }
   else if(action==='water') { let wt=parseFloat(document.getElementById('t-water-wt').value); document.getElementById('t-water-res').innerText = isNaN(wt)? 'Enter weight' : `Recommended Water: ${(wt * 0.033).toFixed(1)} Liters / day`; }
   else if(action==='compound') { let p=parseFloat(document.getElementById('t-ci-p').value), r=parseFloat(document.getElementById('t-ci-r').value), t=parseFloat(document.getElementById('t-ci-t').value); let amt = p * Math.pow((1 + r/100), t); document.getElementById('t-ci-res').innerText = isNaN(amt)? 'Enter values' : `Total Maturity: ₹${amt.toFixed(2)}`; }
