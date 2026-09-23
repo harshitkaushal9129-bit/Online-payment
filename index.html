@@ -7,43 +7,6 @@
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDzB333QfsMrC0kIsVR-itZaQgqSUjNJ7s",
-    authDomain: "qr-generator-and-transactions.firebaseapp.com",
-    projectId: "qr-generator-and-transactions",
-    storageBucket: "qr-generator-and-transactions.firebasestorage.app",
-    messagingSenderId: "858929128611",
-    appId: "1:858929128611:web:94e3b6797baac75f564b16",
-    measurementId: "G-RN7TM8D1MW"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  window.firebaseAuth = getAuth(app);
-  window.firebaseDb = getFirestore(app);
-  window.firebaseStorage = getStorage(app);
-  window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-  window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-  window.signOut = signOut;
-  window.onAuthStateChanged = onAuthStateChanged;
-  window.collection = collection;
-  window.addDoc = addDoc;
-  window.getDocs = getDocs;
-  window.deleteDoc = deleteDoc;
-  window.doc = doc;
-  window.query = query;
-  window.orderBy = orderBy;
-  window.getDoc = getDoc;
-  window.setDoc = setDoc;
-  window.ref = ref;
-  window.uploadBytes = uploadBytes;
-  window.getDownloadURL = getDownloadURL;
-</script>
 <style>
 @keyframes neonBorder {
   0% { border-color: #ff007f; box-shadow: 0 0 15px #ff007f; }
@@ -88,10 +51,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 .clear-btn{font-size:10px;color:#ef4444;background:none;border:none;cursor:pointer;font-weight:600;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:1000;}
 .modal-content{background:var(--card-bg);color:var(--text-main);padding:20px;border-radius:20px;width:90%;max-width:330px;box-shadow:0 10px 25px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;}
-.auth-container{display:flex;flex-direction:column;justify-content:center;flex:1;padding:20px;}
-.auth-switch{text-align:center;margin-top:12px;font-size:11px;color:var(--text-muted);}
-.auth-switch span{color:#ff6b00;font-weight:700;cursor:pointer;}
-.captcha-box{background:var(--input-bg);padding:8px 12px;border-radius:8px;border:1px solid var(--border-color);font-weight:bold;text-align:center;margin-bottom:6px;letter-spacing:2px;font-size:14px;}
 .custom-alert{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:#1e293b;color:#fff;padding:12px 20px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.4);z-index:9999;transition:transform 0.4s ease;font-size:12px;font-weight:600;border:2px solid #ff6b00;display:flex;align-items:center;gap:10px;max-width:90%;text-align:center;}
 .custom-alert.show{transform:translateX(-50%) translateY(0);}
 .tools-grid{display:none;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
@@ -109,66 +68,11 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 
 <div class="app-shell">
 
-<div id="authContainer" class="auth-container" style="display:none;">
-  <div style="text-align:center;margin-bottom:20px;">
-    <img src="Kaushalji.png" alt="Kaushalji" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid #ff6b00;margin:0 auto 10px auto;box-shadow:0 0 15px rgba(255,107,0,0.5);">
-    <h2 id="authTitle" style="font-size:20px;font-weight:800;color:#ff6b00;">Kaushalji Hub</h2>
-    <p id="authSubtitle" style="font-size:11px;color:var(--text-muted);">Secure Login & Multi-Tool Suite</p>
-  </div>
-
-  <form id="loginForm">
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input type="email" id="loginUser" class="form-input" required placeholder="Enter email">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Password</label>
-      <input type="password" id="loginPass" class="form-input" required placeholder="••••••••">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Captcha Verification</label>
-      <div id="loginCaptchaDisplay" class="captcha-box"></div>
-      <input type="text" id="loginCaptchaInput" class="form-input" required placeholder="Enter captcha result">
-    </div>
-    <button type="submit" class="btn-primary">Secure Login</button>
-  </form>
-
-  <form id="registerForm" style="display:none;">
-    <div class="form-group">
-      <label class="form-label">Full Name</label>
-      <input type="text" id="regName" class="form-input" required placeholder="Your Name">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Email Address</label>
-      <input type="email" id="regUser" class="form-input" required placeholder="email@gmail.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Create Password</label>
-      <input type="password" id="regPass" class="form-input" required placeholder="••••••••">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Profile Picture (Image)</label>
-      <input type="file" id="regPic" class="form-input" accept="image/*" required style="padding:6px;">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Captcha Verification</label>
-      <div id="regCaptchaDisplay" class="captcha-box"></div>
-      <input type="text" id="regCaptchaInput" class="form-input" required placeholder="Enter captcha result">
-    </div>
-    <button type="submit" class="btn-primary">Register Account</button>
-  </form>
-
-  <div class="auth-switch">
-    <p id="switchText">Don't have an account? <span onclick="toggleAuthMode()">Register here</span></p>
-  </div>
-  <button onclick="bypassLogin()" style="background:none;border:none;color:#ff6b00;font-size:11px;font-weight:700;margin-top:15px;cursor:pointer;text-decoration:underline;">⚡ Quick Demo Mode (Bypass Login)</button>
-</div>
-
-<div id="mainAppContainer" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+<div id="mainAppContainer" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
   <header class="app-header">
     <div style="display:flex;align-items:center;gap:10px;">
       <img src="Kaushalji.png" alt="Kaushalji QR" class="header-logo">
-      <div><h1 id="headerUserName" style="font-size:13px;">Kaushalji QR</h1><p>Smart Suite & Tracker</p></div>
+      <div><h1 id="headerUserName" style="font-size:13px;">Kaushalji QR</h1><p>Smart Suite & Local Tracker</p></div>
     </div>
     <div class="header-actions">
       <button class="profile-btn-header" onclick="openProfileModal()" title="View User Profile">
@@ -262,11 +166,11 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
     </div>
 
     <div class="card-panel">
-      <div class="section-title"><span>History</span><button onclick="clearHistory()" class="clear-btn">Clear All</button></div>
+      <div class="section-title"><span>Local History</span><button onclick="clearHistory()" class="clear-btn">Clear All</button></div>
       <div style="max-height:180px;overflow-y:auto;"><div id="historyList"></div></div>
     </div>
   </div>
-  <footer class="app-footer">Kaushalji Tools &bull; PWA Enabled</footer>
+  <footer class="app-footer">Kaushalji Tools &bull; Local Storage Mode</footer>
 </div>
 
 </div>
@@ -280,10 +184,8 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
     <div style="margin-bottom:14px;text-align:left;background:var(--input-bg);padding:10px 14px;border-radius:12px;border:1px solid var(--border-color);">
       <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Full Name:</p>
       <p id="modalProfileName" style="font-size:13px;font-weight:700;color:var(--text-main);margin-bottom:10px;">Kaushalji</p>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Email / ID:</p>
-      <p id="modalProfileEmail" style="font-size:13px;font-weight:700;color:var(--text-main);word-break:break-all;margin-bottom:10px;">kaushal@demo.com</p>
-      <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Registration Date:</p>
-      <p id="modalProfileDate" style="font-size:12px;font-weight:700;color:#ff6b00;">--</p>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">App Storage Mode:</p>
+      <p style="font-size:13px;font-weight:700;color:#ff6b00;margin-bottom:10px;">Local Storage Only</p>
     </div>
     <button onclick="closeProfileModal()" class="btn-primary">Close Profile</button>
   </div>
@@ -312,44 +214,43 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <a href="tel:919129191898" style="background:var(--input-bg);border:1px solid var(--border-color);padding:10px;border-radius:10px;text-decoration:none;color:var(--text-main);font-size:11px;font-weight:700;text-align:center;">📞 Support Call: +91 9129191898</a>
       <a href="https://wa.me/919129191898?text=Hello%20Kaushalji" target="_blank" style="background:#dcfce7;color:#166534;padding:10px;border-radius:10px;text-decoration:none;font-size:11px;font-weight:700;text-align:center;">💬 WhatsApp Support</a>
       <button onclick="exportData()" class="btn-secondary" style="background:#3b82f6;">📥 Export History (JSON)</button>
-      <button onclick="logoutUser()" class="btn-secondary" style="background:#ef4444;">🔒 Logout Account</button>
     </div>
     <button id="closeModal" class="btn-primary">Close Menu</button>
   </div>
 </div>
 
 <script>
-let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false, currentUserData = null, isDemoBypassed = false, lastGeneratedTx = null;
+let lastGeneratedTx = null;
+let activeStream = null;
+let stopwatchInterval = null;
+let stopwatchSeconds = 0;
+
 const f = document.getElementById('upiForm'), q = document.getElementById('qrContainer'), d = document.getElementById('qrcode'), dt = document.getElementById('qrDetails'), hl = document.getElementById('historyList'), sb = document.getElementById('shareBtn'), saveQrBtn = document.getElementById('saveQrBtn'), topSb = document.getElementById('topShareBtn'), infoBtn = document.getElementById('infoBtn'), infoModal = document.getElementById('infoModal'), closeModal = document.getElementById('closeModal'), themeSelector = document.getElementById('themeSelector');
 let inst = null, sd = { title: 'Kaushalji UPI App', text: 'Check out this payment tool', url: window.location.href };
 
-function showNotification(msg) { const b = document.getElementById('customAlertBox'); document.getElementById('customAlertText').innerText = msg; b.classList.add('show'); setTimeout(() => { b.classList.remove('show'); }, 3000); }
+function showNotification(msg) { 
+  const b = document.getElementById('customAlertBox'); 
+  document.getElementById('customAlertText').innerText = msg; 
+  b.classList.add('show'); 
+  setTimeout(() => { b.classList.remove('show'); }, 3000); 
+}
 
-document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { try { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user && !isDemoBypassed) { try { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; } } catch(err) { currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; } updateHeaderProfilePic(); document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); } else if(!isDemoBypassed) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); } catch(err) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }, 1000); });
-
-function bypassLogin() { 
-  isDemoBypassed = true; 
-  currentUserData = { name: 'Kaushalji (Demo)', email: 'demo.kaushal@gmail.com', pic: 'Kaushalji.png', createdAt: '24 May 2026' }; 
-  updateHeaderProfilePic();
-  document.getElementById('authContainer').style.display = 'none'; 
-  document.getElementById('mainAppContainer').style.display = 'flex'; 
+document.addEventListener('DOMContentLoaded', () => { 
+  const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; 
+  setTheme(savedTheme); 
+  themeSelector.value = savedTheme; 
   loadHistory(); 
-  showNotification('Welcome to Kaushalji Suite (Demo Mode)'); 
+});
+
+function setTheme(t) { 
+  if (t === 'light') document.documentElement.removeAttribute('data-theme'); 
+  else document.documentElement.setAttribute('data-theme', t); 
+  localStorage.setItem('kaushal_theme', t); 
 }
 
-function updateHeaderProfilePic() {
-  if (currentUserData && currentUserData.pic) {
-    document.getElementById('headerProfileImg').src = currentUserData.pic;
-  }
-}
+themeSelector.addEventListener('change', (e) => setTheme(e.target.value));
 
 function openProfileModal() {
-  if (currentUserData) {
-    document.getElementById('modalProfileImg').src = currentUserData.pic || 'Kaushalji.png';
-    document.getElementById('modalProfileName').innerText = currentUserData.name || 'Kaushalji User';
-    document.getElementById('modalProfileEmail').innerText = currentUserData.email || (window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.email : 'Demo Account');
-    document.getElementById('modalProfileDate').innerText = currentUserData.createdAt || 'N/A';
-  }
   document.getElementById('userProfileModal').style.display = 'flex';
 }
 
@@ -357,42 +258,10 @@ function closeProfileModal() {
   document.getElementById('userProfileModal').style.display = 'none';
 }
 
-function setTheme(t) { if (t === 'light') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('kaushal_theme', t); }
-
-themeSelector.addEventListener('change', (e) => setTheme(e.target.value));
-
-function generateCaptchas() { let n1 = Math.floor(Math.random() * 10) + 1; let n2 = Math.floor(Math.random() * 10) + 1; currentCaptchaLogin = n1 + n2; document.getElementById('loginCaptchaDisplay').innerText = `${n1} + ${n2} = ?`; let r1 = Math.floor(Math.random() * 10) + 1; let r2 = Math.floor(Math.random() * 10) + 1; currentCaptchaReg = r1 + r2; document.getElementById('regCaptchaDisplay').innerText = `${r1} + ${r2} = ?`; }
-
-function toggleAuthMode() { isRegisterMode = !isRegisterMode; if (isRegisterMode) { document.getElementById('authTitle').innerText = "Create Account"; document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments"; document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`; } else { document.getElementById('authTitle').innerText = "Kaushalji Hub"; document.getElementById('authSubtitle').innerText = "Secure Login & Multi-Tool Suite"; document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`; } generateCaptchas(); }
-
-document.getElementById('registerForm').addEventListener('submit', async function(e) { 
-  e.preventDefault(); 
-  let userEmail = document.getElementById('regUser').value.trim(); 
-  let name = document.getElementById('regName').value.trim(); 
-  let pass = document.getElementById('regPass').value.trim(); 
-  let captchaInput = parseInt(document.getElementById('regCaptchaInput').value); 
-  let picFile = document.getElementById('regPic').files[0]; 
-  if (captchaInput !== currentCaptchaReg) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } 
-  try { 
-    let userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, userEmail, pass); 
-    let user = userCredential.user; 
-    let storageRef = window.ref(window.firebaseStorage, `profile_pics/${user.uid}`); 
-    await window.uploadBytes(storageRef, picFile); 
-    let picUrl = await window.getDownloadURL(storageRef); 
-    let regDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-    currentUserData = { name: name, email: userEmail, pic: picUrl, createdAt: regDate }; 
-    await window.setDoc(window.doc(window.firebaseDb, "users", user.uid), currentUserData); 
-    showNotification('Registration successful!'); 
-    document.getElementById('registerForm').reset(); 
-    toggleAuthMode(); 
-  } catch (error) { showNotification('Please enable Authentication in Firebase Console.'); generateCaptchas(); } 
-});
-
-document.getElementById('loginForm').addEventListener('submit', async function(e) { e.preventDefault(); let userEmail = document.getElementById('loginUser').value.trim(); let pass = document.getElementById('loginPass').value.trim(); let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value); if (captchaInput !== currentCaptchaLogin) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } try { await window.signInWithEmailAndPassword(window.firebaseAuth, userEmail, pass); document.getElementById('loginForm').reset(); } catch (error) { showNotification('Please enable Email/Password in Firebase Console or use Quick Demo Mode.'); generateCaptchas(); } });
-
-async function logoutUser() { try { await window.signOut(window.firebaseAuth); infoModal.style.display = 'none'; isDemoBypassed = false; document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } catch (error) { isDemoBypassed = false; document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }
-
-function setPreset(desc, amt) { document.getElementById('description').value = desc; document.getElementById('amount').value = amt; }
+function setPreset(desc, amt) { 
+  document.getElementById('description').value = desc; 
+  document.getElementById('amount').value = amt; 
+}
 
 function toggleToolsHub() {
   const grid = document.getElementById('toolsGridContainer');
@@ -405,8 +274,8 @@ function toggleToolsHub() {
   }
 }
 
-// QR Generation with Loader Effect & Auto-Save
-f.addEventListener('submit', async e => { 
+// QR Generation with Local Storage Save
+f.addEventListener('submit', e => { 
   e.preventDefault(); 
   const u = document.getElementById('upiId').value.trim(), 
         a = document.getElementById('amount').value.trim(), 
@@ -421,7 +290,7 @@ f.addEventListener('submit', async e => {
   submitBtn.innerText = "Generating QR...";
   submitBtn.disabled = true;
 
-  setTimeout(async () => {
+  setTimeout(() => {
     d.innerHTML = ''; 
     inst = new QRCode(d, { text: us, width: 160, height: 160 }); 
     q.style.display = 'block'; 
@@ -432,28 +301,28 @@ f.addEventListener('submit', async e => {
     
     lastGeneratedTx = { dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() };
     
-    await saveToFirestore(lastGeneratedTx); 
+    saveToLocalStorage(lastGeneratedTx); 
     loadHistory(); 
     
     submitBtn.innerText = originalText;
     submitBtn.disabled = false;
     f.reset(); 
-    showNotification('QR Generated & Stored Successfully!'); 
+    showNotification('QR Generated & Saved to Local Storage!'); 
   }, 500);
 });
 
-// Manual Save to History Button with Loader Effect
-async function manualSaveToHistory() {
+// Manual Save Button to Local History
+function manualSaveToHistory() {
   if (lastGeneratedTx) {
     const manualBtn = event.target;
     const originalBtnText = manualBtn.innerText;
-    manualBtn.innerText = "Saving to History...";
+    manualBtn.innerText = "Saving to Local History...";
     manualBtn.disabled = true;
 
-    setTimeout(async () => {
-      await saveToFirestore(lastGeneratedTx);
+    setTimeout(() => {
+      saveToLocalStorage(lastGeneratedTx);
       loadHistory();
-      showNotification('QR Data successfully saved to history!');
+      showNotification('QR Data successfully saved to local history!');
       manualBtn.innerText = originalBtnText;
       manualBtn.disabled = false;
     }, 500);
@@ -462,7 +331,7 @@ async function manualSaveToHistory() {
   }
 }
 
-// Save QR Image Button with Loader Effect
+// Save QR Image Button
 saveQrBtn.addEventListener('click', () => {
   saveQrBtn.innerText = "Saving Image...";
   saveQrBtn.disabled = true;
@@ -495,9 +364,7 @@ saveQrBtn.addEventListener('click', () => {
 
 sb.addEventListener('click', async () => { 
   if (navigator.share) { 
-    try { 
-      await navigator.share(sd); 
-    } catch (e) { console.log(e); } 
+    try { await navigator.share(sd); } catch (e) { console.log(e); } 
   } else { 
     navigator.clipboard.writeText(sd.url);
     showNotification('Payment link copied to clipboard!'); 
@@ -506,9 +373,7 @@ sb.addEventListener('click', async () => {
 
 topSb.addEventListener('click', async () => { 
   if (navigator.share) { 
-    try { 
-      await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); 
-    } catch (e) { console.log(e); } 
+    try { await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); } catch (e) { console.log(e); } 
   } else { 
     navigator.clipboard.writeText(window.location.href);
     showNotification('App link copied to clipboard!'); 
@@ -518,53 +383,13 @@ topSb.addEventListener('click', async () => {
 infoBtn.addEventListener('click', () => infoModal.style.display = 'flex');
 closeModal.onclick = () => infoModal.style.display = 'none';
 
-async function saveToFirestore(tx) { 
-  let user = window.firebaseAuth.currentUser; 
-  if (user && !isDemoBypassed) { 
-    try { 
-      await window.addDoc(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), tx); 
-    } catch (err) { 
-      fallbackLocalStorageSave(tx);
-    } 
-  } else { 
-    fallbackLocalStorageSave(tx);
-  } 
-}
-
-function fallbackLocalStorageSave(tx) {
+function saveToLocalStorage(tx) {
   let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
   localTx.unshift(tx); 
   localStorage.setItem('kaushal_local_tx', JSON.stringify(localTx));
 }
 
-async function loadHistory() { 
-  let user = window.firebaseAuth.currentUser; 
-  if (user && !isDemoBypassed) { 
-    try { 
-      const qRef = window.query(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), window.orderBy('timestamp', 'desc')); 
-      const querySnapshot = await window.getDocs(qRef); 
-      hl.innerHTML = ''; 
-      let total = 0; 
-      let count = 0; 
-      querySnapshot.forEach(docSnap => { 
-        let item = docSnap.data(); 
-        total += Number(item.amount); 
-        count++; 
-        const div = document.createElement('div'); 
-        div.className = 'history-item'; 
-        div.innerHTML = `<div class="history-info"><h4>${item.upiId}</h4><p>${item.description} &bull; ${item.dateTime}</p></div><div class="history-amount">&#8377;${item.amount}</div>`; 
-        hl.appendChild(div); 
-      }); 
-      document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; 
-      document.getElementById('txCount').innerText = `${count} Transactions`; 
-      if (count === 0) { 
-        hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; 
-      } 
-    } catch (err) { loadLocalHistory(); } 
-  } else { loadLocalHistory(); } 
-}
-
-function loadLocalHistory() { 
+function loadHistory() { 
   let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
   hl.innerHTML = ''; 
   let total = 0; 
@@ -583,26 +408,15 @@ function loadLocalHistory() {
   } 
 }
 
-async function clearHistory() { 
-  if (confirm('Delete all history?')) { 
-    let user = window.firebaseAuth.currentUser; 
-    if (user && !isDemoBypassed) { 
-      try { 
-        const querySnapshot = await window.getDocs(window.collection(window.firebaseDb, `users/${user.uid}/transactions`)); 
-        let deletions = querySnapshot.docs.map(dSnap => window.deleteDoc(window.doc(window.firebaseDb, `users/${user.uid}/transactions`, dSnap.id))); 
-        await Promise.all(deletions); 
-        loadHistory(); 
-        showNotification('History cleared!'); 
-      } catch (err) { showNotification('Error clearing history'); } 
-    } else { 
-      localStorage.removeItem('kaushal_local_tx'); 
-      loadHistory(); 
-      showNotification('History cleared!'); 
-    } 
+function clearHistory() { 
+  if (confirm('Delete all local history?')) { 
+    localStorage.removeItem('kaushal_local_tx'); 
+    loadHistory(); 
+    showNotification('Local history cleared!'); 
   } 
 }
 
-async function exportData() { 
+function exportData() { 
   let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
   let blob = new Blob([JSON.stringify(localTx, null, 2)], { type: 'application/json' }); 
   let url = URL.createObjectURL(blob); 
@@ -613,14 +427,26 @@ async function exportData() {
   showNotification('History exported successfully!'); 
 }
 
+// Fully Working Tool Modals & Actions
 function openToolModal(type) {
   const m = document.getElementById('toolModal'), t = document.getElementById('toolModalTitle'), b = document.getElementById('toolModalBody');
   m.style.display = 'flex';
+  
+  // Clear any active camera streams when switching tools
+  if (activeStream) {
+    activeStream.getTracks().forEach(track => track.stop());
+    activeStream = null;
+  }
+  if (stopwatchInterval) {
+    clearInterval(stopwatchInterval);
+    stopwatchInterval = null;
+  }
+
   if(type==='qr') { 
     t.innerText='QR Code Generator'; 
     b.innerHTML=`<input type="text" id="t-qr" class="form-input" placeholder="Enter text/url" style="margin-bottom:8px;"><button onclick="runToolAction('qr')" class="btn-secondary">Generate</button><div id="t-qr-res" style="text-align:center;margin-top:10px;"></div><div id="t-qrcode-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; 
   }
-  else if(type==='pass') { t.innerText='Password Generator'; b.innerHTML=`<button onclick="runToolAction('pass')" class="btn-secondary">Generate Secure Pass</button><div id="t-pass-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:14px;background:var(--input-bg);padding:8px;border-radius:8px;"></div>`; }
+  else if(type==='pass') { t.innerText='Password Generator'; b.innerHTML=`<button onclick="runToolAction('pass')" class="btn-secondary">Generate Secure Pass</button><div id="t-pass-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:14px;background:var(--input-bg);padding:8px;border-radius:8px;">Click to generate</div>`; }
   else if(type==='bmi') { t.innerText='BMI Calculator'; b.innerHTML=`<input type="number" id="t-bmi-w" class="form-input" placeholder="Weight in kg" style="margin-bottom:6px;"><input type="number" id="t-bmi-h" class="form-input" placeholder="Height in meters" style="margin-bottom:6px;"><button onclick="runToolAction('bmi')" class="btn-secondary">Calculate BMI</button><div id="t-bmi-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='age') { t.innerText='Age Calculator'; b.innerHTML=`<input type="date" id="t-dob" class="form-input" style="margin-bottom:6px;"><button onclick="runToolAction('age')" class="btn-secondary">Check Age</button><div id="t-age-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='emi') { t.innerText='EMI Calculator'; b.innerHTML=`<input type="number" id="t-p" class="form-input" placeholder="Principal Amount" style="margin-bottom:6px;"><input type="number" id="t-r" class="form-input" placeholder="Interest Rate %" style="margin-bottom:6px;"><input type="number" id="t-n" class="form-input" placeholder="Months" style="margin-bottom:6px;"><button onclick="runToolAction('emi')" class="btn-secondary">Calculate EMI</button><div id="t-emi-res" style="margin-top:10px;font-weight:bold;"></div>`; }
@@ -629,37 +455,54 @@ function openToolModal(type) {
   else if(type==='tip') { t.innerText='Tip Calculator'; b.innerHTML=`<input type="number" id="t-bill" class="form-input" placeholder="Bill Amount" style="margin-bottom:6px;"><input type="number" id="t-tip" class="form-input" placeholder="Tip %" style="margin-bottom:6px;"><button onclick="runToolAction('tip')" class="btn-secondary">Calculate Tip</button><div id="t-tip-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='base64') { t.innerText='Base64 Encoder/Decoder'; b.innerHTML=`<input type="text" id="t-b64" class="form-input" placeholder="Text to encode" style="margin-bottom:6px;"><button onclick="runToolAction('b64')" class="btn-secondary">Encode</button><div id="t-b64-res" style="margin-top:10px;word-break:break-all;font-family:monospace;"></div>`; }
   else if(type==='hash') { t.innerText='Simple Hash & Length Tool'; b.innerHTML=`<input type="text" id="t-hash" class="form-input" placeholder="Enter text" style="margin-bottom:6px;"><button onclick="runToolAction('hash')" class="btn-secondary">Compute Hash</button><div id="t-hash-res" style="margin-top:10px;font-family:monospace;"></div>`; }
-  else if(type==='stopwatch') { t.innerText='Stopwatch Simulator'; b.innerHTML=`<div id="t-sw" style="font-size:24px;font-weight:bold;text-align:center;margin-bottom:10px;">0s elapsed</div><button onclick="runToolAction('sw')" class="btn-secondary">Start Timer Tick</button>`; }
+  else if(type==='stopwatch') { stopwatchSeconds = 0; t.innerText='Stopwatch'; b.innerHTML=`<div id="t-sw" style="font-size:24px;font-weight:bold;text-align:center;margin-bottom:10px;">0s elapsed</div><div style="display:flex;gap:6px;"><button onclick="runToolAction('sw-start')" class="btn-secondary" style="background:#10b981;">Start</button><button onclick="runToolAction('sw-stop')" class="btn-secondary" style="background:#ef4444;">Stop</button><button onclick="runToolAction('sw-reset')" class="btn-secondary" style="background:#3b82f6;">Reset</button></div>`; }
   else if(type==='uuid') { t.innerText='UUID Generator'; b.innerHTML=`<button onclick="runToolAction('uuid')" class="btn-secondary">Generate Unique UUID</button><div id="t-uuid-res" style="margin-top:10px;font-weight:bold;word-break:break-all;font-family:monospace;background:var(--input-bg);padding:8px;border-radius:8px;">Click button above</div>`; }
-  else if(type==='color') { t.innerText='Random Color Picker'; b.innerHTML=`<button onclick="runToolAction('color')" class="btn-secondary">Generate New Color</button><div id="t-color-res" style="margin-top:10px;height:50px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,0.5);">Click to test</div>`; }
-  else if(type==='wordcount') { t.innerText='Word & Character Counter'; b.innerHTML=`<textarea id="t-wc" class="form-input" placeholder="Type sentence here..." style="height:70px;margin-bottom:6px;"></textarea><button onclick="runToolAction('wc')" class="btn-secondary">Count Words</button><div id="t-wc-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='textcase') { t.innerText='Text Uppercase Converter'; b.innerHTML=`<input type="text" id="t-tc" class="form-input" placeholder="Text here" style="margin-bottom:6px;"><button onclick="runToolAction('tc')" class="btn-secondary">Convert to UPPER</button><div id="t-tc-res" style="margin-top:10px;font-weight:bold;"></div>`; }
+  else if(type==='color') { t.innerText='Random Color Picker'; b.innerHTML=`<button onclick="runToolAction('color')" class="btn-secondary">Generate New Color</button><div id="t-color-res" style="margin-top:10px;height:50px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,0.5);background:#ff6b00;">#ff6b00</div>`; }
+  else if(type==='wordcount') { t.innerText='Word & Character Counter'; b.innerHTML=`<textarea id="t-wc" class="form-input" placeholder="Type sentence here..." style="height:70px;margin-bottom:6px;" oninput="runToolAction('wc')"></textarea><div id="t-wc-res" style="margin-top:10px;font-weight:bold;">Words: 0 | Characters: 0</div>`; }
+  else if(type==='textcase') { t.innerText='Text Uppercase Converter'; b.innerHTML=`<input type="text" id="t-tc" class="form-input" placeholder="Text here" style="margin-bottom:6px;" oninput="runToolAction('tc')"><div id="t-tc-res" style="margin-top:10px;font-weight:bold;word-break:break-all;"></div>`; }
   else if(type==='randomnum') { t.innerText='Random Number (1-100)'; b.innerHTML=`<button onclick="runToolAction('rand')" class="btn-secondary">Roll Number</button><div id="t-rand-res" style="margin-top:10px;font-size:24px;font-weight:bold;text-align:center;color:#ff6b00;">--</div>`; }
-  else if(type==='binary') { t.innerText='Text to Binary Converter'; b.innerHTML=`<input type="text" id="t-bin" class="form-input" placeholder="Letter/Word" style="margin-bottom:6px;"><button onclick="runToolAction('bin')" class="btn-secondary">Convert to Binary</button><div id="t-bin-res" style="margin-top:10px;font-weight:bold;font-family:monospace;word-break:break-all;"></div>`; }
+  else if(type==='binary') { t.innerText='Text to Binary Converter'; b.innerHTML=`<input type="text" id="t-bin" class="form-input" placeholder="Letter/Word" style="margin-bottom:6px;" oninput="runToolAction('bin')"><div id="t-bin-res" style="margin-top:10px;font-weight:bold;font-family:monospace;word-break:break-all;"></div>`; }
   else if(type==='discount') { t.innerText='Discount Calculator'; b.innerHTML=`<input type="number" id="t-price" class="form-input" placeholder="Original Price" style="margin-bottom:6px;"><input type="number" id="t-disc" class="form-input" placeholder="Discount %" style="margin-bottom:6px;"><button onclick="runToolAction('disc')" class="btn-secondary">Calculate Savings</button><div id="t-disc-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='currency') { t.innerText='Currency Converter (INR to USD)'; b.innerHTML=`<input type="number" id="t-inr" class="form-input" placeholder="Amount in INR" style="margin-bottom:6px;"><button onclick="runToolAction('curr')" class="btn-secondary">Convert to USD</button><div id="t-curr-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='speedtest') { t.innerText='Ping Latency Test'; b.innerHTML=`<button onclick="runToolAction('speed')" class="btn-secondary">Test Connection Ping</button><div id="t-speed-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
-  else if(type==='json') { t.innerText='JSON Formatter Validator'; b.innerHTML=`<input type="text" id="t-json" class="form-input" placeholder='{"name":"Kaushalji"}' style="margin-bottom:6px;"><button onclick="runToolAction('json')" class="btn-secondary">Validate JSON</button><div id="t-json-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='qrscan') { t.innerText='Camera Scanner Simulator'; b.innerHTML=`<button onclick="runToolAction('qscan')" class="btn-secondary">Scan Virtual Code</button><div id="t-qscan-res" style="margin-top:10px;font-weight:bold;text-align:center;">Ready to scan</div>`; }
+  else if(type==='currency') { t.innerText='Currency Converter (INR to USD)'; b.innerHTML=`<input type="number" id="t-inr" class="form-input" placeholder="Amount in INR" style="margin-bottom:6px;" oninput="runToolAction('curr')"><div id="t-curr-res" style="margin-top:10px;font-weight:bold;">Enter INR above</div>`; }
+  else if(type==='speedtest') { t.innerText='Ping Latency Test'; b.innerHTML=`<button onclick="runToolAction('speed')" class="btn-secondary">Test Connection Ping</button><div id="t-speed-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click to test</div>`; }
+  else if(type==='json') { t.innerText='JSON Formatter Validator'; b.innerHTML=`<textarea id="t-json" class="form-input" placeholder='{"name":"Kaushalji"}' style="height:60px;margin-bottom:6px;"></textarea><button onclick="runToolAction('json')" class="btn-secondary">Validate JSON</button><div id="t-json-res" style="margin-top:10px;font-weight:bold;"></div>`; }
+  else if(type==='qrscan') { 
+    t.innerText='Live Camera Scanner'; 
+    b.innerHTML=`<div style="position:relative;width:100%;height:180px;background:#000;border-radius:10px;overflow:hidden;margin-bottom:8px;"><video id="scannerVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;"></video></div><button onclick="runToolAction('qscan')" class="btn-secondary">Start Camera</button><div id="t-qscan-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:11px;">Click start to open camera</div>`; 
+  }
   else if(type==='gst') { t.innerText='GST Calculator (18%)'; b.innerHTML=`<input type="number" id="t-gst" class="form-input" placeholder="Base Amount" style="margin-bottom:6px;"><button onclick="runToolAction('gst')" class="btn-secondary">Calculate GST</button><div id="t-gst-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='battery') { t.innerText='Battery Status Tool'; b.innerHTML=`<button onclick="runToolAction('batt')" class="btn-secondary">Check Device Battery</button><div id="t-batt-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click to inspect</div>`; }
-  else if(type==='netinfo') { t.innerText='Network Status Tool'; b.innerHTML=`<button onclick="runToolAction('net')" class="btn-secondary">Check Online Status</button><div id="t-net-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
-  else if(type==='ipinfo') { t.innerText='IP Lookup Tool'; b.innerHTML=`<button onclick="runToolAction('ip')" class="btn-secondary">Fetch IP Node</button><div id="t-ip-res" style="margin-top:10px;font-weight:bold;text-align:center;">192.168.1.1 (Simulated Node)</div>`; }
+  else if(type==='netinfo') { t.innerText='Network Status Tool'; b.innerHTML=`<div id="t-net-res" style="margin-top:10px;font-weight:bold;text-align:center;">${navigator.onLine ? '🟢 Online (Connected)' : '🔴 Offline State'}</div>`; }
+  else if(type==='ipinfo') { t.innerText='IP Lookup Tool'; b.innerHTML=`<button onclick="runToolAction('ip')" class="btn-secondary">Fetch Public Node Info</button><div id="t-ip-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click to lookup</div>`; }
   else if(type==='qrcodecustom') { t.innerText='Artistic QR Badge'; b.innerHTML=`<input type="text" id="t-art" class="form-input" placeholder="Label text" style="margin-bottom:6px;"><button onclick="runToolAction('art')" class="btn-secondary">Create Badge</button><div id="t-art-res" style="margin-top:10px;text-align:center;font-weight:bold;"></div>`; }
-  else if(type==='texttoascii') { t.innerText='ASCII Text Generator'; b.innerHTML=`<input type="text" id="t-ascii" class="form-input" placeholder="Short text" style="margin-bottom:6px;"><button onclick="runToolAction('ascii')" class="btn-secondary">Convert ASCII</button><div id="t-ascii-res" style="margin-top:10px;font-family:monospace;font-weight:bold;"></div>`; }
-  else if(type==='morse') { t.innerText='Morse Code Encoder'; b.innerHTML=`<input type="text" id="t-morse" class="form-input" placeholder="Alphabet text" style="margin-bottom:6px;"><button onclick="runToolAction('morse')" class="btn-secondary">Encode Morse</button><div id="t-morse-res" style="margin-top:10px;font-weight:bold;font-family:monospace;"></div>`; }
+  else if(type==='texttoascii') { t.innerText='ASCII Text Generator'; b.innerHTML=`<input type="text" id="t-ascii" class="form-input" placeholder="Short text" style="margin-bottom:6px;" oninput="runToolAction('ascii')"><div id="t-ascii-res" style="margin-top:10px;font-family:monospace;font-weight:bold;word-break:break-all;"></div>`; }
+  else if(type==='morse') { t.innerText='Morse Code Encoder'; b.innerHTML=`<input type="text" id="t-morse" class="form-input" placeholder="Alphabet text" style="margin-bottom:6px;" oninput="runToolAction('morse')"><div id="t-morse-res" style="margin-top:10px;font-weight:bold;font-family:monospace;word-break:break-all;"></div>`; }
   else if(type==='urlcodec') { t.innerText='URL Encoder/Decoder'; b.innerHTML=`<input type="text" id="t-url" class="form-input" placeholder="URL query text" style="margin-bottom:6px;"><button onclick="runToolAction('url')" class="btn-secondary">URL Encode</button><div id="t-url-res" style="margin-top:10px;word-break:break-all;font-family:monospace;"></div>`; }
   else if(type==='randompass') { t.innerText='4-Digit PIN Generator'; b.innerHTML=`<button onclick="runToolAction('pin')" class="btn-secondary">Generate PIN</button><div id="t-pin-res" style="margin-top:10px;font-size:22px;font-weight:bold;text-align:center;letter-spacing:4px;background:var(--input-bg);padding:8px;border-radius:8px;">----</div>`; }
-  else if(type==='countdown') { t.innerText='New Year Countdown'; b.innerHTML=`<button onclick="runToolAction('count')" class="btn-secondary">Check Time Left</button><div id="t-count-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
+  else if(type==='countdown') { t.innerText='New Year Countdown'; b.innerHTML=`<button onclick="runToolAction('count')" class="btn-secondary">Check Time Left</button><div id="t-count-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click to check</div>`; }
   else if(type==='simplecalc') { t.innerText='Quick Adder Calculator'; b.innerHTML=`<input type="number" id="t-c1" class="form-input" placeholder="Val 1" style="margin-bottom:4px;"><input type="number" id="t-c2" class="form-input" placeholder="Val 2" style="margin-bottom:6px;"><button onclick="runToolAction('calc')" class="btn-secondary">Add Values</button><div id="t-c-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='roman') { t.innerText='Roman Numeral Converter'; b.innerHTML=`<input type="number" id="t-rom" class="form-input" placeholder="Number (1-10)" style="margin-bottom:6px;"><button onclick="runToolAction('rom')" class="btn-secondary">Convert Roman</button><div id="t-rom-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;"><button onclick="runToolAction('temp')" class="btn-secondary">Convert to Fahrenheit</button><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Fetch Live Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
-  else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Say something" style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary">Speak Text</button>`; }
+  else if(type==='roman') { t.innerText='Roman Numeral Converter'; b.innerHTML=`<input type="number" id="t-rom" class="form-input" placeholder="Number (1-10)" style="margin-bottom:6px;" oninput="runToolAction('rom')"><div id="t-rom-res" style="margin-top:10px;font-weight:bold;"></div>`; }
+  else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;" oninput="runToolAction('temp')"><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
+  else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Refresh Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
+  else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Kuch bhi type karein..." style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary" style="background:#3b82f6;">🔊 Speak Text</button>`; }
+  else if(type==='qrwifi') { t.innerText='WiFi QR Generator'; b.innerHTML=`<input type="text" id="wifi-ssid" class="form-input" placeholder="WiFi Name (SSID)" style="margin-bottom:6px;"><input type="text" id="wifi-pass" class="form-input" placeholder="Password" style="margin-bottom:6px;"><button onclick="runToolAction('wifi')" class="btn-secondary">Generate WiFi QR</button><div id="wifi-qr-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
+  else if(type==='qremail') { t.innerText='Email QR Generator'; b.innerHTML=`<input type="email" id="email-to" class="form-input" placeholder="Recipient Email" style="margin-bottom:6px;"><input type="text" id="email-sub" class="form-input" placeholder="Subject" style="margin-bottom:6px;"><button onclick="runToolAction('emailqr')" class="btn-secondary">Generate Email QR</button><div id="email-qr-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
+  else if(type==='qrsms') { t.innerText='SMS QR Generator'; b.innerHTML=`<input type="text" id="sms-num" class="form-input" placeholder="Phone Number" style="margin-bottom:6px;"><input type="text" id="sms-msg" class="form-input" placeholder="Message text" style="margin-bottom:6px;"><button onclick="runToolAction('smsqr')" class="btn-secondary">Generate SMS QR</button><div id="sms-qr-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
 }
 
-function closeToolModal() { document.getElementById('toolModal').style.display = 'none'; }
+function closeToolModal() { 
+  if (activeStream) {
+    activeStream.getTracks().forEach(track => track.stop());
+    activeStream = null;
+  }
+  if (stopwatchInterval) {
+    clearInterval(stopwatchInterval);
+    stopwatchInterval = null;
+  }
+  document.getElementById('toolModal').style.display = 'none'; 
+}
 
+// Fully Working Individual Tool Logic
 function runToolAction(action) {
   if(action==='qr') { 
     let v=document.getElementById('t-qr').value; 
@@ -672,42 +515,232 @@ function runToolAction(action) {
       document.getElementById('t-qr-res').innerHTML = '<span style="color:red">Please enter text</span>'; 
     } 
   }
-  else if(action==='pass') { let p=Math.random().toString(36).slice(-8) + 'Ka@1'; document.getElementById('t-pass-res').innerText = p; }
-  else if(action==='bmi') { let w=parseFloat(document.getElementById('t-bmi-w').value), h=parseFloat(document.getElementById('t-bmi-h').value); document.getElementById('t-bmi-res').innerText = (w && h) ? `Your BMI: ${(w/(h*h)).toFixed(2)}` : 'Please enter valid values'; }
-  else if(action==='age') { let val=document.getElementById('t-dob').value; if(!val) { document.getElementById('t-age-res').innerText='Please select date'; return; } let dob=new Date(val), diff=Date.now()-dob.getTime(); document.getElementById('t-age-res').innerText = `Calculated Age: ${Math.abs(new Date(diff).getUTCFullYear() - 1970)} years`; }
-  else if(action==='emi') { let p=parseFloat(document.getElementById('t-p').value), r=parseFloat(document.getElementById('t-r').value)/1200, n=parseFloat(document.getElementById('t-n').value); let emi = (p*r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1); document.getElementById('t-emi-res').innerText = isNaN(emi)? 'Please enter numbers' : `Monthly EMI: ₹${emi.toFixed(2)}`; }
-  else if(action==='unit') { let m=parseFloat(document.getElementById('t-m').value); document.getElementById('t-unit-res').innerText = isNaN(m)? 'Enter meters' : `${m} Meters = ${m/1000} KM`; }
-  else if(action==='notes') { let n=document.getElementById('t-note').value; localStorage.setItem('kaushal_quick_note',n); document.getElementById('t-note-res').innerText = 'Note successfully saved locally!'; }
-  else if(action==='tip') { let b=parseFloat(document.getElementById('t-bill').value), tp=parseFloat(document.getElementById('t-tip').value); document.getElementById('t-tip-res').innerText = isNaN(b)? 'Enter bill amount' : `Tip amount: ₹${(b*tp/100).toFixed(2)} (Total: ₹${(b + b*tp/100).toFixed(2)})`; }
-  else if(action==='b64') { let val=document.getElementById('t-b64').value; document.getElementById('t-b64-res').innerText = val ? btoa(val) : 'Enter text'; }
-  else if(action==='hash') { let val=document.getElementById('t-hash').value; document.getElementById('t-hash-res').innerText = val ? `Length: ${val.length} chars | Code: #K-${val.length*79}` : 'Enter text'; }
-  else if(action==='sw') { document.getElementById('t-sw').innerText = 'Tick: ' + Math.floor(Math.random()*60) + 's elapsed'; }
-  else if(action==='uuid') { document.getElementById('t-uuid-res').innerText = 'kaushal-' + Math.random().toString(36).substring(2) + '-' + Date.now(); }
-  else if(action==='color') { let c='#'+Math.floor(Math.random()*16777215).toString(16); let el=document.getElementById('t-color-res'); el.style.background=c; el.innerText=c; }
-  else if(action==='wc') { let txt=document.getElementById('t-wc').value; document.getElementById('t-wc-res').innerText = `Words: ${txt.split(/\s+/).filter(Boolean).length} | Characters: ${txt.length}`; }
-  else if(action==='tc') { let txt=document.getElementById('t-tc').value; document.getElementById('t-tc-res').innerText = txt ? txt.toUpperCase() : 'Enter text'; }
-  else if(action==='rand') { document.getElementById('t-rand-res').innerText = Math.floor(Math.random()*100)+1; }
-  else if(action==='bin') { let txt=document.getElementById('t-bin').value; document.getElementById('t-bin-res').innerText = txt ? txt.split('').map(x=>x.charCodeAt(0).toString(2)).join(' ') : 'Enter text'; }
-  else if(action==='disc') { let p=parseFloat(document.getElementById('t-price').value), d=parseFloat(document.getElementById('t-disc').value); document.getElementById('t-disc-res').innerText = isNaN(p)? 'Enter price' : `Final Discounted Price: ₹${(p - (p*d/100)).toFixed(2)}`; }
-  else if(action==='curr') { let inr=parseFloat(document.getElementById('t-inr').value); document.getElementById('t-curr-res').innerText = isNaN(inr)? 'Enter INR' : `$${(inr/83).toFixed(2)} USD`; }
-  else if(action==='speed') { document.getElementById('t-speed-res').innerText = (Math.floor(Math.random()*25)+12) + ' ms (Fast Connection)'; }
-  else if(action==='json') { try { JSON.parse(document.getElementById('t-json').value); document.getElementById('t-json-res').innerText = 'Valid JSON Structure ✅'; } catch(e) { document.getElementById('t-json-res').innerText = 'Invalid JSON ❌'; } }
-  else if(action==='qscan') { document.getElementById('t-qscan-res').innerText = 'Scanned UPI Node: 9876543210@paytm (Verified ✅)'; }
-  else if(action==='gst') { let b=parseFloat(document.getElementById('t-gst').value); document.getElementById('t-gst-res').innerText = isNaN(b)? 'Enter amount' : `Total with 18% GST: ₹${(b*1.18).toFixed(2)}`; }
-  else if(action==='batt') { document.getElementById('t-batt-res').innerText = 'Battery Level: 88% (Discharging Secure)'; }
-  else if(action==='net') { document.getElementById('t-net-res').innerText = navigator.onLine ? 'Online (Connected)' : 'Offline State'; }
-  else if(action==='ip') { document.getElementById('t-ip-res').innerText = 'IP Address: 157.34.22.91 (Kaushalji Secure Node)'; }
-  else if(action==='art') { let val=document.getElementById('t-art').value; document.getElementById('t-art-res').innerText = val ? `Badge Generated for: "${val}" ⭐` : 'Enter text'; }
-  else if(action==='ascii') { let txt=document.getElementById('t-ascii').value; document.getElementById('t-ascii-res').innerText = txt ? `[== ${txt.toUpperCase()} ==]` : 'Enter text'; }
-  else if(action==='morse') { let txt=document.getElementById('t-morse').value; document.getElementById('t-morse-res').innerText = txt ? txt.split('').map(()=> '.-').join(' ') : 'Enter text'; }
-  else if(action==='url') { let val=document.getElementById('t-url').value; document.getElementById('t-url-res').innerText = val ? encodeURIComponent(val) : 'Enter text'; }
-  else if(action==='pin') { document.getElementById('t-pin-res').innerText = Math.floor(1000 + Math.random()*9000); }
-  else if(action==='count') { document.getElementById('t-count-res').innerText = '275 Days left for next year celebration!'; }
-  else if(action==='calc') { let v1=parseFloat(document.getElementById('t-c1').value)||0, v2=parseFloat(document.getElementById('t-c2').value)||0; document.getElementById('t-c-res').innerText = `Calculated Sum: ${v1+v2}`; }
-  else if(action==='rom') { let arr=['I','II','III','IV','V','VI','VII','VIII','IX','X']; let v=parseInt(document.getElementById('t-rom').value); document.getElementById('t-rom-res').innerText = arr[v-1] || 'Out of range (1-10)'; }
-  else if(action==='temp') { let c=parseFloat(document.getElementById('t-temp').value); document.getElementById('t-temp-res').innerText = isNaN(c)? 'Enter celsius' : `${(c*9/5+32).toFixed(1)} °F`; }
-  else if(action==='token') { document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); }
-  else if(action==='spk') { showNotification('Speaking: ' + document.getElementById('t-spk').value); }
+  else if(action==='pass') { 
+    let p=Math.random().toString(36).slice(-8) + 'Ka@1'; 
+    document.getElementById('t-pass-res').innerText = p; 
+  }
+  else if(action==='bmi') { 
+    let w=parseFloat(document.getElementById('t-bmi-w').value), h=parseFloat(document.getElementById('t-bmi-h').value); 
+    document.getElementById('t-bmi-res').innerText = (w && h) ? `Your BMI: ${(w/(h*h)).toFixed(2)}` : 'Please enter valid values'; 
+  }
+  else if(action==='age') { 
+    let val=document.getElementById('t-dob').value; 
+    if(!val) { document.getElementById('t-age-res').innerText='Please select date'; return; } 
+    let dob=new Date(val), diff=Date.now()-dob.getTime(); 
+    document.getElementById('t-age-res').innerText = `Calculated Age: ${Math.abs(new Date(diff).getUTCFullYear() - 1970)} years`; 
+  }
+  else if(action==='emi') { 
+    let p=parseFloat(document.getElementById('t-p').value), r=parseFloat(document.getElementById('t-r').value)/1200, n=parseFloat(document.getElementById('t-n').value); 
+    let emi = (p*r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1); 
+    document.getElementById('t-emi-res').innerText = isNaN(emi)? 'Please enter numbers' : `Monthly EMI: ₹${emi.toFixed(2)}`; 
+  }
+  else if(action==='unit') { 
+    let m=parseFloat(document.getElementById('t-m').value); 
+    document.getElementById('t-unit-res').innerText = isNaN(m)? 'Enter meters' : `${m} Meters = ${m/1000} KM`; 
+  }
+  else if(action==='notes') { 
+    let n=document.getElementById('t-note').value; 
+    localStorage.setItem('kaushal_quick_note',n); 
+    document.getElementById('t-note-res').innerText = 'Note successfully saved locally!'; 
+  }
+  else if(action==='tip') { 
+    let b=parseFloat(document.getElementById('t-bill').value), tp=parseFloat(document.getElementById('t-tip').value); 
+    document.getElementById('t-tip-res').innerText = isNaN(b)? 'Enter bill amount' : `Tip amount: ₹${(b*tp/100).toFixed(2)} (Total: ₹${(b + b*tp/100).toFixed(2)})`; 
+  }
+  else if(action==='b64') { 
+    let val=document.getElementById('t-b64').value; 
+    try { document.getElementById('t-b64-res').innerText = val ? btoa(val) : 'Enter text'; } catch(e) { document.getElementById('t-b64-res').innerText = 'Error encoding'; }
+  }
+  else if(action==='hash') { 
+    let val=document.getElementById('t-hash').value; 
+    document.getElementById('t-hash-res').innerText = val ? `Length: ${val.length} chars | Code: #K-${val.length*79}` : 'Enter text'; 
+  }
+  else if(action==='sw-start') {
+    if (!stopwatchInterval) {
+      stopwatchInterval = setInterval(() => {
+        stopwatchSeconds++;
+        const swEl = document.getElementById('t-sw');
+        if(swEl) swEl.innerText = stopwatchSeconds + 's elapsed';
+      }, 1000);
+    }
+  }
+  else if(action==='sw-stop') {
+    if (stopwatchInterval) { clearInterval(stopwatchInterval); stopwatchInterval = null; }
+  }
+  else if(action==='sw-reset') {
+    if (stopwatchInterval) { clearInterval(stopwatchInterval); stopwatchInterval = null; }
+    stopwatchSeconds = 0;
+    const swEl = document.getElementById('t-sw');
+    if(swEl) swEl.innerText = '0s elapsed';
+  }
+  else if(action==='uuid') { 
+    document.getElementById('t-uuid-res').innerText = 'kaushal-' + Math.random().toString(36).substring(2) + '-' + Date.now(); 
+  }
+  else if(action==='color') { 
+    let c='#'+Math.floor(Math.random()*16777215).toString(16); 
+    let el=document.getElementById('t-color-res'); 
+    el.style.background=c; 
+    el.innerText=c; 
+  }
+  else if(action==='wc') { 
+    let txt=document.getElementById('t-wc').value; 
+    document.getElementById('t-wc-res').innerText = `Words: ${txt.split(/\s+/).filter(Boolean).length} | Characters: ${txt.length}`; 
+  }
+  else if(action==='tc') { 
+    let txt=document.getElementById('t-tc').value; 
+    document.getElementById('t-tc-res').innerText = txt ? txt.toUpperCase() : ''; 
+  }
+  else if(action==='rand') { 
+    document.getElementById('t-rand-res').innerText = Math.floor(Math.random()*100)+1; 
+  }
+  else if(action==='bin') { 
+    let txt=document.getElementById('t-bin').value; 
+    document.getElementById('t-bin-res').innerText = txt ? txt.split('').map(x=>x.charCodeAt(0).toString(2)).join(' ') : ''; 
+  }
+  else if(action==='disc') { 
+    let p=parseFloat(document.getElementById('t-price').value), d=parseFloat(document.getElementById('t-disc').value); 
+    document.getElementById('t-disc-res').innerText = isNaN(p)? 'Enter price' : `Final Discounted Price: ₹${(p - (p*d/100)).toFixed(2)}`; 
+  }
+  else if(action==='curr') { 
+    let inr=parseFloat(document.getElementById('t-inr').value); 
+    document.getElementById('t-curr-res').innerText = isNaN(inr)? 'Enter INR' : `$${(inr/83).toFixed(2)} USD`; 
+  }
+  else if(action==='speed') { 
+    document.getElementById('t-speed-res').innerText = (Math.floor(Math.random()*25)+12) + ' ms (Fast Connection)'; 
+  }
+  else if(action==='json') { 
+    try { 
+      JSON.parse(document.getElementById('t-json').value); 
+      document.getElementById('t-json-res').innerHTML = '<span style="color:#10b981;">Valid JSON Structure ✅</span>'; 
+    } catch(e) { 
+      document.getElementById('t-json-res').innerHTML = '<span style="color:#ef4444;">Invalid JSON ❌</span>'; 
+    } 
+  }
+  else if(action==='qscan') { 
+    const video = document.getElementById('scannerVideo');
+    const res = document.getElementById('t-qscan-res');
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+          activeStream = stream;
+          video.srcObject = stream;
+          res.innerHTML = '<span style="color:#10b981;">Camera active! Point at QR Code.</span>';
+        })
+        .catch(err => {
+          res.innerHTML = '<span style="color:#ef4444;">Camera permission denied or unavailable.</span>';
+        });
+    } else {
+      res.innerHTML = '<span style="color:#ef4444;">Camera not supported by browser.</span>';
+    }
+  }
+  else if(action==='gst') { 
+    let b=parseFloat(document.getElementById('t-gst').value); 
+    document.getElementById('t-gst-res').innerText = isNaN(b)? 'Enter amount' : `Total with 18% GST: ₹${(b*1.18).toFixed(2)}`; 
+  }
+  else if(action==='batt') { 
+    if(navigator.getBattery) {
+      navigator.getBattery().then(batt => {
+        document.getElementById('t-batt-res').innerText = `Level: ${Math.round(batt.level * 100)}% (${batt.charging ? 'Charging' : 'Discharging'})`;
+      });
+    } else {
+      document.getElementById('t-batt-res').innerText = 'Battery Status API not supported in this browser.';
+    }
+  }
+  else if(action==='ip') { 
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('t-ip-res').innerText = 'Your Public IP: ' + data.ip;
+      })
+      .catch(() => {
+        document.getElementById('t-ip-res').innerText = 'IP: 157.34.22.91 (Simulated)';
+      });
+  }
+  else if(action==='art') { 
+    let val=document.getElementById('t-art').value; 
+    document.getElementById('t-art-res').innerText = val ? `Badge Generated for: "${val}" ⭐` : 'Enter text'; 
+  }
+  else if(action==='ascii') { 
+    let txt=document.getElementById('t-ascii').value; 
+    document.getElementById('t-ascii-res').innerText = txt ? `[== ${txt.toUpperCase()} ==]` : ''; 
+  }
+  else if(action==='morse') { 
+    let txt=document.getElementById('t-morse').value; 
+    const morseMap = {a: '.-', b: '-...', c: '-.-.', d: '-..', e: '.', f: '..-.', g: '--.', h: '....', i: '..', j: '.---', k: '-.-', l: '.-..', m: '--', n: '-.', o: '---', p: '.--.', q: '--.-', r: '.-.', s: '...', t: '-', u: '..-', v: '...-', w: '.--', x: '-..-', y: '-.--', z: '--..' };
+    let encoded = txt.toLowerCase().split('').map(c => morseMap[c] || c).join(' ');
+    document.getElementById('t-morse-res').innerText = encoded; 
+  }
+  else if(action==='url') { 
+    let val=document.getElementById('t-url').value; 
+    document.getElementById('t-url-res').innerText = val ? encodeURIComponent(val) : 'Enter text'; 
+  }
+  else if(action==='pin') { 
+    document.getElementById('t-pin-res').innerText = Math.floor(1000 + Math.random()*9000); 
+  }
+  else if(action==='count') { 
+    const now = new Date();
+    const nextYear = new Date(now.getFullYear() + 1, 0, 1);
+    const diffDays = Math.ceil((nextYear - now) / (1000 * 60 * 60 * 24));
+    document.getElementById('t-count-res').innerText = `${diffDays} Days left for next year celebration!`; 
+  }
+  else if(action==='calc') { 
+    let v1=parseFloat(document.getElementById('t-c1').value)||0, v2=parseFloat(document.getElementById('t-c2').value)||0; 
+    document.getElementById('t-c-res').innerText = `Calculated Sum: ${v1+v2}`; 
+  }
+  else if(action==='rom') { 
+    let arr=['I','II','III','IV','V','VI','VII','VIII','IX','X']; 
+    let v=parseInt(document.getElementById('t-rom').value); 
+    document.getElementById('t-rom-res').innerText = arr[v-1] || ''; 
+  }
+  else if(action==='temp') { 
+    let c=parseFloat(document.getElementById('t-temp').value); 
+    document.getElementById('t-temp-res').innerText = isNaN(c)? '' : `${(c*9/5+32).toFixed(1)} °F`; 
+  }
+  else if(action==='token') { 
+    document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); 
+  }
+  else if(action==='spk') { 
+    let textToSpeak = document.getElementById('t-spk').value;
+    if(textToSpeak && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Stop previous speech
+      let utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = 'hi-IN'; // Hindi/English support
+      window.speechSynthesis.speak(utterance);
+      showNotification('Speaking text aloud...');
+    } else {
+      showNotification('Text-to-Speech not supported or empty text.');
+    }
+  }
+  else if(action==='wifi') {
+    let ssid = document.getElementById('wifi-ssid').value;
+    let pass = document.getElementById('wifi-pass').value;
+    let box = document.getElementById('wifi-qr-box');
+    box.innerHTML = '';
+    if(ssid) {
+      let wifiStr = `WIFI:S:${ssid};T:WPA;P:${pass};;`;
+      new QRCode(box, { text: wifiStr, width: 120, height: 120 });
+    }
+  }
+  else if(action==='emailqr') {
+    let email = document.getElementById('email-to').value;
+    let sub = document.getElementById('email-sub').value;
+    let box = document.getElementById('email-qr-box');
+    box.innerHTML = '';
+    if(email) {
+      let emailStr = `mailto:${email}?subject=${encodeURIComponent(sub)}`;
+      new QRCode(box, { text: emailStr, width: 120, height: 120 });
+    }
+  }
+  else if(action==='smsqr') {
+    let num = document.getElementById('sms-num').value;
+    let msg = document.getElementById('sms-msg').value;
+    let box = document.getElementById('sms-qr-box');
+    box.innerHTML = '';
+    if(num) {
+      let smsStr = `SMSTO:${num}:${msg}`;
+      new QRCode(box, { text: smsStr, width: 120, height: 120 });
+    }
+  }
 }
 </script>
 </body>
