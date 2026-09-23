@@ -171,8 +171,7 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <div><h1 id="headerUserName" style="font-size:13px;">Kaushalji QR</h1><p>Smart Suite & Tracker</p></div>
     </div>
     <div class="header-actions">
-      <!-- User Profile Button with Rounded Image -->
-      <button class="profile-btn-header" onclick="openMenuModal()" title="User Profile">
+      <button class="profile-btn-header" onclick="openProfileModal()" title="View User Profile">
         <img id="headerProfileImg" src="Kaushalji.png" alt="Profile">
       </button>
       <button id="topShareBtn" class="icon-btn">Share</button>
@@ -186,7 +185,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <span id="txCount">0 Transactions</span>
     </div>
 
-    <!-- Toggleable 40+ Tools Hub Drawer -->
     <div class="card-panel">
       <button class="tools-toggle-btn" onclick="toggleToolsHub()">
         <span>📂</span> <span id="toggleHubText">Open 40+ Smart Tools Hub</span> <span>▼</span>
@@ -256,10 +254,12 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <div class="section-title">Scan & Pay</div>
       <div class="qr-wrapper"><div id="qrcode"></div></div>
       <p id="qrDetails" style="font-size:11px;margin-bottom:10px;font-weight:500;"></p>
-      <div style="display:flex;gap:8px;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
         <button id="saveQrBtn" class="btn-secondary" style="background:#3b82f6;flex:1;">💾 Save QR Image</button>
         <button id="shareBtn" class="btn-secondary" style="flex:1;">🔗 Share Link</button>
       </div>
+      <!-- Added extra button to manually save QR to history if needed -->
+      <button onclick="manualSaveToHistory()" class="btn-secondary" style="background:#f97316;width:100%;">➕ Save QR Data to History</button>
     </div>
 
     <div class="card-panel">
@@ -270,6 +270,25 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   <footer class="app-footer">Kaushalji Tools &bull; PWA Enabled</footer>
 </div>
 
+</div>
+
+<!-- User Profile Details Modal Div with Registration Date -->
+<div id="userProfileModal" class="modal-overlay">
+  <div class="modal-content" style="text-align:center;">
+    <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;color:#ff6b00;">User Profile Details</h3>
+    <div style="display:flex;justify-content:center;margin-bottom:12px;">
+      <img id="modalProfileImg" src="Kaushalji.png" alt="User Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #ff6b00;box-shadow:0 0 10px rgba(255,107,0,0.5);">
+    </div>
+    <div style="margin-bottom:14px;text-align:left;background:var(--input-bg);padding:10px 14px;border-radius:12px;border:1px solid var(--border-color);">
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Full Name:</p>
+      <p id="modalProfileName" style="font-size:13px;font-weight:700;color:var(--text-main);margin-bottom:10px;">Kaushalji</p>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Email / ID:</p>
+      <p id="modalProfileEmail" style="font-size:13px;font-weight:700;color:var(--text-main);word-break:break-all;margin-bottom:10px;">kaushal@demo.com</p>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Registration Date:</p>
+      <p id="modalProfileDate" style="font-size:12px;font-weight:700;color:#ff6b00;">--</p>
+    </div>
+    <button onclick="closeProfileModal()" class="btn-primary">Close Profile</button>
+  </div>
 </div>
 
 <!-- Universal Tool Modal -->
@@ -304,17 +323,17 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 </div>
 
 <script>
-let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false, currentUserData = null, isDemoBypassed = false;
+let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false, currentUserData = null, isDemoBypassed = false, lastGeneratedTx = null;
 const f = document.getElementById('upiForm'), q = document.getElementById('qrContainer'), d = document.getElementById('qrcode'), dt = document.getElementById('qrDetails'), hl = document.getElementById('historyList'), sb = document.getElementById('shareBtn'), saveQrBtn = document.getElementById('saveQrBtn'), topSb = document.getElementById('topShareBtn'), infoBtn = document.getElementById('infoBtn'), infoModal = document.getElementById('infoModal'), closeModal = document.getElementById('closeModal'), themeSelector = document.getElementById('themeSelector');
 let inst = null, sd = { title: 'Kaushalji UPI App', text: 'Check out this payment tool', url: window.location.href };
 
 function showNotification(msg) { const b = document.getElementById('customAlertBox'); document.getElementById('customAlertText').innerText = msg; b.classList.add('show'); setTimeout(() => { b.classList.remove('show'); }, 3000); }
 
-document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { try { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user && !isDemoBypassed) { try { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], pic: 'Kaushalji.png' }; } } catch(err) { currentUserData = { name: user.email.split('@')[0], pic: 'Kaushalji.png' }; } updateHeaderProfilePic(); document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); } else if(!isDemoBypassed) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); } catch(err) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }, 1000); });
+document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { try { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user && !isDemoBypassed) { try { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; } } catch(err) { currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; } updateHeaderProfilePic(); document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); } else if(!isDemoBypassed) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); } catch(err) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }, 1000); });
 
 function bypassLogin() { 
   isDemoBypassed = true; 
-  currentUserData = { name: 'Kaushalji', pic: 'Kaushalji.png' }; 
+  currentUserData = { name: 'Kaushalji (Demo)', email: 'demo.kaushal@gmail.com', pic: 'Kaushalji.png', createdAt: '24 May 2026' }; 
   updateHeaderProfilePic();
   document.getElementById('authContainer').style.display = 'none'; 
   document.getElementById('mainAppContainer').style.display = 'flex'; 
@@ -328,6 +347,20 @@ function updateHeaderProfilePic() {
   }
 }
 
+function openProfileModal() {
+  if (currentUserData) {
+    document.getElementById('modalProfileImg').src = currentUserData.pic || 'Kaushalji.png';
+    document.getElementById('modalProfileName').innerText = currentUserData.name || 'Kaushalji User';
+    document.getElementById('modalProfileEmail').innerText = currentUserData.email || (window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.email : 'Demo Account');
+    document.getElementById('modalProfileDate').innerText = currentUserData.createdAt || 'N/A';
+  }
+  document.getElementById('userProfileModal').style.display = 'flex';
+}
+
+function closeProfileModal() {
+  document.getElementById('userProfileModal').style.display = 'none';
+}
+
 function setTheme(t) { if (t === 'light') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('kaushal_theme', t); }
 
 themeSelector.addEventListener('change', (e) => setTheme(e.target.value));
@@ -336,7 +369,28 @@ function generateCaptchas() { let n1 = Math.floor(Math.random() * 10) + 1; let n
 
 function toggleAuthMode() { isRegisterMode = !isRegisterMode; if (isRegisterMode) { document.getElementById('authTitle').innerText = "Create Account"; document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments"; document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`; } else { document.getElementById('authTitle').innerText = "Kaushalji Hub"; document.getElementById('authSubtitle').innerText = "Secure Login & Multi-Tool Suite"; document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`; } generateCaptchas(); }
 
-document.getElementById('registerForm').addEventListener('submit', async function(e) { e.preventDefault(); let userEmail = document.getElementById('regUser').value.trim(); let name = document.getElementById('regName').value.trim(); let pass = document.getElementById('regPass').value.trim(); let captchaInput = parseInt(document.getElementById('regCaptchaInput').value); let picFile = document.getElementById('regPic').files[0]; if (captchaInput !== currentCaptchaReg) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } try { let userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, userEmail, pass); let user = userCredential.user; let storageRef = window.ref(window.firebaseStorage, `profile_pics/${user.uid}`); await window.uploadBytes(storageRef, picFile); let picUrl = await window.getDownloadURL(storageRef); await window.setDoc(window.doc(window.firebaseDb, "users", user.uid), { name: name, email: userEmail, pic: picUrl }); showNotification('Registration successful!'); document.getElementById('registerForm').reset(); toggleAuthMode(); } catch (error) { showNotification('Please enable Authentication in Firebase Console.'); generateCaptchas(); } });
+document.getElementById('registerForm').addEventListener('submit', async function(e) { 
+  e.preventDefault(); 
+  let userEmail = document.getElementById('regUser').value.trim(); 
+  let name = document.getElementById('regName').value.trim(); 
+  let pass = document.getElementById('regPass').value.trim(); 
+  let captchaInput = parseInt(document.getElementById('regCaptchaInput').value); 
+  let picFile = document.getElementById('regPic').files[0]; 
+  if (captchaInput !== currentCaptchaReg) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } 
+  try { 
+    let userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, userEmail, pass); 
+    let user = userCredential.user; 
+    let storageRef = window.ref(window.firebaseStorage, `profile_pics/${user.uid}`); 
+    await window.uploadBytes(storageRef, picFile); 
+    let picUrl = await window.getDownloadURL(storageRef); 
+    let regDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    currentUserData = { name: name, email: userEmail, pic: picUrl, createdAt: regDate }; 
+    await window.setDoc(window.doc(window.firebaseDb, "users", user.uid), currentUserData); 
+    showNotification('Registration successful!'); 
+    document.getElementById('registerForm').reset(); 
+    toggleAuthMode(); 
+  } catch (error) { showNotification('Please enable Authentication in Firebase Console.'); generateCaptchas(); } 
+});
 
 document.getElementById('loginForm').addEventListener('submit', async function(e) { e.preventDefault(); let userEmail = document.getElementById('loginUser').value.trim(); let pass = document.getElementById('loginPass').value.trim(); let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value); if (captchaInput !== currentCaptchaLogin) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } try { await window.signInWithEmailAndPassword(window.firebaseAuth, userEmail, pass); document.getElementById('loginForm').reset(); } catch (error) { showNotification('Please enable Email/Password in Firebase Console or use Quick Demo Mode.'); generateCaptchas(); } });
 
@@ -344,7 +398,6 @@ async function logoutUser() { try { await window.signOut(window.firebaseAuth); i
 
 function setPreset(desc, amt) { document.getElementById('description').value = desc; document.getElementById('amount').value = amt; }
 
-// Toggle function for 40+ Tools Hub
 function toggleToolsHub() {
   const grid = document.getElementById('toolsGridContainer');
   const text = document.getElementById('toggleHubText');
@@ -356,6 +409,7 @@ function toggleToolsHub() {
   }
 }
 
+// Automatically save QR data to history on generation
 f.addEventListener('submit', async e => { 
   e.preventDefault(); 
   const u = document.getElementById('upiId').value.trim(), 
@@ -374,14 +428,25 @@ f.addEventListener('submit', async e => {
   
   sd = { title: 'UPI Payment', text: `Pay \u20b9${a} for "${ds}". UPI: ${fu}`, url: us }; 
   
-  // Saving to Firestore / Local Storage & reloading history immediately
-  await saveToFirestore({ dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() }); 
+  lastGeneratedTx = { dateTime: tStr, upiId: u, description: ds, amount: Number(a), timestamp: Date.now() };
+  
+  // Automatic saving upon generating QR
+  await saveToFirestore(lastGeneratedTx); 
   loadHistory(); 
   f.reset(); 
-  showNotification('QR Code Generated & Saved to History!'); 
+  showNotification('QR Generated & Auto-Saved to History!'); 
 });
 
-// Save QR Image Handler
+async function manualSaveToHistory() {
+  if(lastGeneratedTx) {
+    await saveToFirestore(lastGeneratedTx);
+    loadHistory();
+    showNotification('QR Data manually saved to history again!');
+  } else {
+    showNotification('Please generate a QR code first.');
+  }
+}
+
 saveQrBtn.addEventListener('click', () => {
   const imgEl = d.querySelector('img');
   const canvasEl = d.querySelector('canvas');
@@ -427,8 +492,6 @@ topSb.addEventListener('click', async () => {
 });
 
 infoBtn.addEventListener('click', () => infoModal.style.display = 'flex');
-function openMenuModal() { infoModal.style.display = 'flex'; }
-
 closeModal.onclick = () => infoModal.style.display = 'none';
 
 async function saveToFirestore(tx) { 
@@ -520,7 +583,6 @@ async function exportData() {
   showNotification('History exported successfully!'); 
 }
 
-// Fully Detailed Interactive Tool Modals
 function openToolModal(type) {
   const m = document.getElementById('toolModal'), t = document.getElementById('toolModalTitle'), b = document.getElementById('toolModalBody');
   m.style.display = 'flex';
@@ -564,14 +626,25 @@ function openToolModal(type) {
   else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;"><button onclick="runToolAction('temp')" class="btn-secondary">Convert to Fahrenheit</button><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Fetch Live Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
   else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Say something" style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary">Speak Text</button>`; }
-  else if(type==='qrwifi') { t.innerText='WiFi QR Creator'; b.innerHTML=`<input type="text" id="t-wf" class="form-input" placeholder="WiFi SSID" style="margin-bottom:6px;"><button onclick="runToolAction('wifi')" class="btn-secondary">Generate WiFi QR</button><div id="t-wifi-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
-  else if(type==='qremail') { t.innerText='Email QR Creator'; b.innerHTML=`<input type="text" id="t-em" class="form-input" placeholder="recipient@domain.com" style="margin-bottom:6px;"><button onclick="runToolAction('email')" class="btn-secondary">Generate Email QR</button><div id="t-email-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
-  else if(type==='qrsms') { t.innerText='SMS QR Creator'; b.innerHTML=`<input type="text" id="t-sm" class="form-input" placeholder="Phone Number" style="margin-bottom:6px;"><button onclick="runToolAction('sms')" class="btn-secondary">Generate SMS QR</button><div id="t-sms-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; }
+  else if(type==='qrwifi') { 
+    let box = document.getElementById('t-wifi-box'); box.innerHTML = '';
+    let val = document.getElementById('t-wf').value;
+    if(val) { new QRCode(box, { text: `WIFI:S:${val};T:WPA;;`, width: 100, height: 100 }); showNotification('WiFi QR Generated!'); }
+  }
+  else if(type==='qremail') { 
+    let box = document.getElementById('t-email-box'); box.innerHTML = '';
+    let val = document.getElementById('t-em').value;
+    if(val) { new QRCode(box, { text: `mailto:${val}`, width: 100, height: 100 }); showNotification('Email QR Generated!'); }
+  }
+  else if(type==='qrsms') { 
+    let box = document.getElementById('t-sms-box'); box.innerHTML = '';
+    let val = document.getElementById('t-sm').value;
+    if(val) { new QRCode(box, { text: `sms:${val}`, width: 100, height: 100 }); showNotification('SMS QR Generated!'); }
+  }
 }
 
 function closeToolModal() { document.getElementById('toolModal').style.display = 'none'; }
 
-// Fully Implemented Tool Actions
 function runToolAction(action) {
   if(action==='qr') { 
     let v=document.getElementById('t-qr').value; 
@@ -620,17 +693,17 @@ function runToolAction(action) {
   else if(action==='temp') { let c=parseFloat(document.getElementById('t-temp').value); document.getElementById('t-temp-res').innerText = isNaN(c)? 'Enter celsius' : `${(c*9/5+32).toFixed(1)} °F`; }
   else if(action==='token') { document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); }
   else if(action==='spk') { showNotification('Speaking: ' + document.getElementById('t-spk').value); }
-  else if(action==='wifi') { 
+  else if(type==='wifi') { 
     let box = document.getElementById('t-wifi-box'); box.innerHTML = '';
     let val = document.getElementById('t-wf').value;
     if(val) { new QRCode(box, { text: `WIFI:S:${val};T:WPA;;`, width: 100, height: 100 }); showNotification('WiFi QR Generated!'); }
   }
-  else if(action==='email') { 
+  else if(type==='qremail') { 
     let box = document.getElementById('t-email-box'); box.innerHTML = '';
     let val = document.getElementById('t-em').value;
     if(val) { new QRCode(box, { text: `mailto:${val}`, width: 100, height: 100 }); showNotification('Email QR Generated!'); }
   }
-  else if(action==='sms') { 
+  else if(type==='qrsms') { 
     let box = document.getElementById('t-sms-box'); box.innerHTML = '';
     let val = document.getElementById('t-sm').value;
     if(val) { new QRCode(box, { text: `sms:${val}`, width: 100, height: 100 }); showNotification('SMS QR Generated!'); }
