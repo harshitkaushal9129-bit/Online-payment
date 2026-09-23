@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kaushalji QR & Multi-Tools Suite Pro</title>
+<title>Kaushalji QR & Multi-Tools Suite</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<!-- jsQR library for real-time camera scanning -->
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -89,7 +87,7 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 .app-footer{background-color:var(--card-bg);border-top:1px solid var(--border-color);padding:10px;text-align:center;font-size:10px;color:var(--text-muted);}
 .clear-btn{font-size:10px;color:#ef4444;background:none;border:none;cursor:pointer;font-weight:600;}
 .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:1000;}
-.modal-content{background:var(--card-bg);color:var(--text-main);padding:20px;border-radius:20px;width:90%;max-width:350px;box-shadow:0 10px 25px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;}
+.modal-content{background:var(--card-bg);color:var(--text-main);padding:20px;border-radius:20px;width:90%;max-width:330px;box-shadow:0 10px 25px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;}
 .auth-container{display:flex;flex-direction:column;justify-content:center;flex:1;padding:20px;}
 .auth-switch{text-align:center;margin-top:12px;font-size:11px;color:var(--text-muted);}
 .auth-switch span{color:#ff6b00;font-weight:700;cursor:pointer;}
@@ -111,12 +109,11 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 
 <div class="app-shell">
 
-<!-- AUTH CONTAINER -->
 <div id="authContainer" class="auth-container" style="display:none;">
   <div style="text-align:center;margin-bottom:20px;">
-    <img src="Kaushalji.png" alt="Kaushalji" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid #ff6b00;margin:0 auto 10px auto;box-shadow:0 0 15px rgba(255,107,0,0.5);" onerror="this.src='https://via.placeholder.com/70?text=K'">
+    <img src="Kaushalji.png" alt="Kaushalji" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid #ff6b00;margin:0 auto 10px auto;box-shadow:0 0 15px rgba(255,107,0,0.5);">
     <h2 id="authTitle" style="font-size:20px;font-weight:800;color:#ff6b00;">Kaushalji Hub</h2>
-    <p id="authSubtitle" style="font-size:11px;color:var(--text-muted);">Secure Login & 60+ Smart Tool Suite</p>
+    <p id="authSubtitle" style="font-size:11px;color:var(--text-muted);">Secure Login & Multi-Tool Suite</p>
   </div>
 
   <form id="loginForm">
@@ -167,16 +164,15 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   <button onclick="bypassLogin()" style="background:none;border:none;color:#ff6b00;font-size:11px;font-weight:700;margin-top:15px;cursor:pointer;text-decoration:underline;">⚡ Quick Demo Mode (Bypass Login)</button>
 </div>
 
-<!-- MAIN APP CONTAINER -->
 <div id="mainAppContainer" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
   <header class="app-header">
     <div style="display:flex;align-items:center;gap:10px;">
-      <img src="Kaushalji.png" alt="Kaushalji QR" class="header-logo" onerror="this.src='https://via.placeholder.com/40?text=K'">
+      <img src="Kaushalji.png" alt="Kaushalji QR" class="header-logo">
       <div><h1 id="headerUserName" style="font-size:13px;">Kaushalji QR</h1><p>Smart Suite & Tracker</p></div>
     </div>
     <div class="header-actions">
       <button class="profile-btn-header" onclick="openProfileModal()" title="View User Profile">
-        <img id="headerProfileImg" src="Kaushalji.png" alt="Profile" onerror="this.src='https://via.placeholder.com/34?text=P'">
+        <img id="headerProfileImg" src="Kaushalji.png" alt="Profile">
       </button>
       <button id="topShareBtn" class="icon-btn">Share</button>
       <button id="infoBtn" class="icon-btn">Menu</button>
@@ -189,10 +185,9 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <span id="txCount">0 Transactions</span>
     </div>
 
-    <!-- 60+ TOOLS HUB TOGGLE -->
     <div class="card-panel">
       <button class="tools-toggle-btn" onclick="toggleToolsHub()">
-        <span>📂</span> <span id="toggleHubText">Open 60+ Smart Tools Hub</span> <span>▼</span>
+        <span>📂</span> <span id="toggleHubText">Open 40+ Smart Tools Hub</span> <span>▼</span>
       </button>
       <div id="toolsGridContainer" class="tools-grid">
         <div class="tool-icon-btn" onclick="openToolModal('qr')"><span>🔲</span>QR Gen</div>
@@ -230,31 +225,11 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
         <div class="tool-icon-btn" onclick="openToolModal('simplecalc')"><span>➕</span>Calculator</div>
         <div class="tool-icon-btn" onclick="openToolModal('roman')"><span>🏛️</span>Roman Num</div>
         <div class="tool-icon-btn" onclick="openToolModal('tempconv')"><span>🌡️</span>Temp Conv</div>
-        <div class="tool-icon-btn" onclick="openToolModal('crypto')"><span>🪙</span>Token</div>
-        <div class="tool-icon-btn" onclick="openToolModal('textspeech')"><span>🔊</span>Speech</div>
+        <div class="tool-icon-btn" onclick="openToolModal('crypto')"><span>🪙</span>Dummy Token</div>
+        <div class="tool-icon-btn" onclick="openToolModal('textspeech')"><span>🔊</span>Text Speech</div>
         <div class="tool-icon-btn" onclick="openToolModal('qrwifi')"><span>🛜</span>WiFi QR</div>
         <div class="tool-icon-btn" onclick="openToolModal('qremail')"><span>✉️</span>Email QR</div>
         <div class="tool-icon-btn" onclick="openToolModal('qrsms')"><span>💬</span>SMS QR</div>
-        <div class="tool-icon-btn" onclick="openToolModal('lunar')"><span>🌙</span>Age Planet</div>
-        <div class="tool-icon-btn" onclick="openToolModal('water')"><span>💧</span>Water Calc</div>
-        <div class="tool-icon-btn" onclick="openToolModal('compound')"><span>📈</span>C.Interest</div>
-        <div class="tool-icon-btn" onclick="openToolModal('salry')"><span>💸</span>Salary Calc</div>
-        <div class="tool-icon-btn" onclick="openToolModal('fuel')"><span>⛽</span>Fuel Cost</div>
-        <div class="tool-icon-btn" onclick="openToolModal('speeddist')"><span>🚗</span>Speed/Dist</div>
-        <div class="tool-icon-btn" onclick="openToolModal('ohms')"><span>⚡</span>Ohm's Law</div>
-        <div class="tool-icon-btn" onclick="openToolModal('pressure')"><span>🎈</span>Pressure</div>
-        <div class="tool-icon-btn" onclick="openToolModal('energy')"><span>🔋</span>Energy Conv</div>
-        <div class="tool-icon-btn" onclick="openToolModal('data')"><span>💾</span>Data Size</div>
-        <div class="tool-icon-btn" onclick="openToolModal('morseaudio')"><span>🎵</span>Morse Tone</div>
-        <div class="tool-icon-btn" onclick="openToolModal('dice')"><span>🎯</span>Dice Roll</div>
-        <div class="tool-icon-btn" onclick="openToolModal('coinflip')"><span>🪙</span>Flip Coin</div>
-        <div class="tool-icon-btn" onclick="openToolModal('lorem')"><span>📄</span>Lorem Ipsum</div>
-        <div class="tool-icon-btn" onclick="openToolModal('slugify')"><span>🔗</span>Slugify</div>
-        <div class="tool-icon-btn" onclick="openToolModal('htmlencode')"><span>🌐</span>HTML Escape</div>
-        <div class="tool-icon-btn" onclick="openToolModal('seotitle')"><span>🔍</span>SEO Counter</div>
-        <div class="tool-icon-btn" onclick="openToolModal('aspect')"><span>📐</span>Aspect Ratio</div>
-        <div class="tool-icon-btn" onclick="openToolModal('tipsplit')"><span>👥</span>Split Bill</div>
-        <div class="tool-icon-btn" onclick="openToolModal('worldclock')"><span>🕒</span>World Clock</div>
       </div>
     </div>
 
@@ -296,12 +271,11 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 
 </div>
 
-<!-- USER PROFILE MODAL -->
 <div id="userProfileModal" class="modal-overlay">
   <div class="modal-content" style="text-align:center;">
     <h3 style="font-size:15px;font-weight:800;margin-bottom:14px;color:#ff6b00;">User Profile Details</h3>
     <div style="display:flex;justify-content:center;margin-bottom:12px;">
-      <img id="modalProfileImg" src="Kaushalji.png" alt="User Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #ff6b00;box-shadow:0 0 10px rgba(255,107,0,0.5);" onerror="this.src='https://via.placeholder.com/80?text=U'">
+      <img id="modalProfileImg" src="Kaushalji.png" alt="User Profile" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #ff6b00;box-shadow:0 0 10px rgba(255,107,0,0.5);">
     </div>
     <div style="margin-bottom:14px;text-align:left;background:var(--input-bg);padding:10px 14px;border-radius:12px;border:1px solid var(--border-color);">
       <p style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Full Name:</p>
@@ -315,7 +289,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   </div>
 </div>
 
-<!-- TOOL MODAL -->
 <div id="toolModal" class="modal-overlay">
   <div class="modal-content">
     <h3 id="toolModalTitle" style="font-size:14px;font-weight:800;margin-bottom:12px;">Tool Utility</h3>
@@ -324,7 +297,6 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
   </div>
 </div>
 
-<!-- INFO / SETTINGS MODAL -->
 <div id="infoModal" class="modal-overlay">
   <div class="modal-content">
     <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;">App Settings & Support</h3>
@@ -340,9 +312,7 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
       <a href="tel:919129191898" style="background:var(--input-bg);border:1px solid var(--border-color);padding:10px;border-radius:10px;text-decoration:none;color:var(--text-main);font-size:11px;font-weight:700;text-align:center;">📞 Support Call: +91 9129191898</a>
       <a href="https://wa.me/919129191898?text=Hello%20Kaushalji" target="_blank" style="background:#dcfce7;color:#166534;padding:10px;border-radius:10px;text-decoration:none;font-size:11px;font-weight:700;text-align:center;">💬 WhatsApp Support</a>
       <button onclick="exportData()" class="btn-secondary" style="background:#3b82f6;">📥 Export History (JSON)</button>
-      <button onclick="logoutUser()" class="btn-secondary" style="background:#ef4444;font-weight:bold;display:flex;align-items:center;justify-content:center;gap:6px;">
-        <span>🔒</span> Log Out Account
-      </button>
+      <button onclick="logoutUser()" class="btn-secondary" style="background:#ef4444;">🔒 Logout Account</button>
     </div>
     <button id="closeModal" class="btn-primary">Close Menu</button>
   </div>
@@ -350,53 +320,12 @@ body{background:var(--bg-gradient);min-height:100vh;display:flex;justify-content
 
 <script>
 let currentCaptchaLogin = 0, currentCaptchaReg = 0, isRegisterMode = false, currentUserData = null, isDemoBypassed = false, lastGeneratedTx = null;
-let cameraStream = null, scanAnimationFrame = null;
-
 const f = document.getElementById('upiForm'), q = document.getElementById('qrContainer'), d = document.getElementById('qrcode'), dt = document.getElementById('qrDetails'), hl = document.getElementById('historyList'), sb = document.getElementById('shareBtn'), saveQrBtn = document.getElementById('saveQrBtn'), topSb = document.getElementById('topShareBtn'), infoBtn = document.getElementById('infoBtn'), infoModal = document.getElementById('infoModal'), closeModal = document.getElementById('closeModal'), themeSelector = document.getElementById('themeSelector');
 let inst = null, sd = { title: 'Kaushalji UPI App', text: 'Check out this payment tool', url: window.location.href };
 
-function showNotification(msg) { 
-  const b = document.getElementById('customAlertBox'); 
-  document.getElementById('customAlertText').innerText = msg; 
-  b.classList.add('show'); 
-  setTimeout(() => { b.classList.remove('show'); }, 3000); 
-}
+function showNotification(msg) { const b = document.getElementById('customAlertBox'); document.getElementById('customAlertText').innerText = msg; b.classList.add('show'); setTimeout(() => { b.classList.remove('show'); }, 3000); }
 
-document.addEventListener('DOMContentLoaded', () => { 
-  const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; 
-  setTheme(savedTheme); 
-  themeSelector.value = savedTheme; 
-  generateCaptchas(); 
-  setTimeout(() => { 
-    try { 
-      window.onAuthStateChanged(window.firebaseAuth, async (user) => { 
-        if (user && !isDemoBypassed) { 
-          try { 
-            const userDocRef = window.doc(window.firebaseDb, "users", user.uid); 
-            const userDoc = await window.getDoc(userDocRef); 
-            if (userDoc.exists()) { 
-              currentUserData = userDoc.data(); 
-            } else { 
-              currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; 
-            } 
-          } catch(err) { 
-            currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; 
-          } 
-          updateHeaderProfilePic(); 
-          document.getElementById('authContainer').style.display = 'none'; 
-          document.getElementById('mainAppContainer').style.display = 'flex'; 
-          loadHistory(); 
-        } else if(!isDemoBypassed) { 
-          document.getElementById('authContainer').style.display = 'flex'; 
-          document.getElementById('mainAppContainer').style.display = 'none'; 
-        } 
-      }); 
-    } catch(err) { 
-      document.getElementById('authContainer').style.display = 'flex'; 
-      document.getElementById('mainAppContainer').style.display = 'none'; 
-    } 
-  }, 1000); 
-});
+document.addEventListener('DOMContentLoaded', () => { const savedTheme = localStorage.getItem('kaushal_theme') || 'light'; setTheme(savedTheme); themeSelector.value = savedTheme; generateCaptchas(); setTimeout(() => { try { window.onAuthStateChanged(window.firebaseAuth, async (user) => { if (user && !isDemoBypassed) { try { const userDocRef = window.doc(window.firebaseDb, "users", user.uid); const userDoc = await window.getDoc(userDocRef); if (userDoc.exists()) { currentUserData = userDoc.data(); } else { currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; } } catch(err) { currentUserData = { name: user.email.split('@')[0], email: user.email, pic: 'Kaushalji.png', createdAt: new Date().toLocaleDateString() }; } updateHeaderProfilePic(); document.getElementById('authContainer').style.display = 'none'; document.getElementById('mainAppContainer').style.display = 'flex'; loadHistory(); } else if(!isDemoBypassed) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }); } catch(err) { document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }, 1000); });
 
 function bypassLogin() { 
   isDemoBypassed = true; 
@@ -428,42 +357,13 @@ function closeProfileModal() {
   document.getElementById('userProfileModal').style.display = 'none';
 }
 
-function setTheme(t) { 
-  if (t === 'light') document.documentElement.removeAttribute('data-theme'); 
-  else document.documentElement.setAttribute('data-theme', t); 
-  localStorage.setItem('kaushal_theme', t); 
-}
+function setTheme(t) { if (t === 'light') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t); localStorage.setItem('kaushal_theme', t); }
 
 themeSelector.addEventListener('change', (e) => setTheme(e.target.value));
 
-function generateCaptchas() { 
-  let n1 = Math.floor(Math.random() * 10) + 1; 
-  let n2 = Math.floor(Math.random() * 10) + 1; 
-  currentCaptchaLogin = n1 + n2; 
-  document.getElementById('loginCaptchaDisplay').innerText = `${n1} + ${n2} = ?`; 
-  let r1 = Math.floor(Math.random() * 10) + 1; 
-  let r2 = Math.floor(Math.random() * 10) + 1; 
-  currentCaptchaReg = r1 + r2; 
-  document.getElementById('regCaptchaDisplay').innerText = `${r1} + ${r2} = ?`; 
-}
+function generateCaptchas() { let n1 = Math.floor(Math.random() * 10) + 1; let n2 = Math.floor(Math.random() * 10) + 1; currentCaptchaLogin = n1 + n2; document.getElementById('loginCaptchaDisplay').innerText = `${n1} + ${n2} = ?`; let r1 = Math.floor(Math.random() * 10) + 1; let r2 = Math.floor(Math.random() * 10) + 1; currentCaptchaReg = r1 + r2; document.getElementById('regCaptchaDisplay').innerText = `${r1} + ${r2} = ?`; }
 
-function toggleAuthMode() { 
-  isRegisterMode = !isRegisterMode; 
-  if (isRegisterMode) { 
-    document.getElementById('authTitle').innerText = "Create Account"; 
-    document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments"; 
-    document.getElementById('loginForm').style.display = 'none'; 
-    document.getElementById('registerForm').style.display = 'block'; 
-    document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`; 
-  } else { 
-    document.getElementById('authTitle').innerText = "Kaushalji Hub"; 
-    document.getElementById('authSubtitle').innerText = "Secure Login & 60+ Tool Suite"; 
-    document.getElementById('loginForm').style.display = 'block'; 
-    document.getElementById('registerForm').style.display = 'none'; 
-    document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`; 
-  } 
-  generateCaptchas(); 
-}
+function toggleAuthMode() { isRegisterMode = !isRegisterMode; if (isRegisterMode) { document.getElementById('authTitle').innerText = "Create Account"; document.getElementById('authSubtitle').innerText = "Register to start tracking your QR payments"; document.getElementById('loginForm').style.display = 'none'; document.getElementById('registerForm').style.display = 'block'; document.getElementById('switchText').innerHTML = `Already have an account? <span onclick="toggleAuthMode()">Login here</span>`; } else { document.getElementById('authTitle').innerText = "Kaushalji Hub"; document.getElementById('authSubtitle').innerText = "Secure Login & Multi-Tool Suite"; document.getElementById('loginForm').style.display = 'block'; document.getElementById('registerForm').style.display = 'none'; document.getElementById('switchText').innerHTML = `Don't have an account? <span onclick="toggleAuthMode()">Register here</span>`; } generateCaptchas(); }
 
 document.getElementById('registerForm').addEventListener('submit', async function(e) { 
   e.preventDefault(); 
@@ -488,49 +388,24 @@ document.getElementById('registerForm').addEventListener('submit', async functio
   } catch (error) { showNotification('Please enable Authentication in Firebase Console.'); generateCaptchas(); } 
 });
 
-document.getElementById('loginForm').addEventListener('submit', async function(e) { 
-  e.preventDefault(); 
-  let userEmail = document.getElementById('loginUser').value.trim(); 
-  let pass = document.getElementById('loginPass').value.trim(); 
-  let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value); 
-  if (captchaInput !== currentCaptchaLogin) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } 
-  try { 
-    await window.signInWithEmailAndPassword(window.firebaseAuth, userEmail, pass); 
-    document.getElementById('loginForm').reset(); 
-  } catch (error) { showNotification('Please enable Email/Password in Firebase or use Quick Demo Mode.'); generateCaptchas(); } 
-});
+document.getElementById('loginForm').addEventListener('submit', async function(e) { e.preventDefault(); let userEmail = document.getElementById('loginUser').value.trim(); let pass = document.getElementById('loginPass').value.trim(); let captchaInput = parseInt(document.getElementById('loginCaptchaInput').value); if (captchaInput !== currentCaptchaLogin) { showNotification('Invalid Captcha! Please try again.'); generateCaptchas(); return; } try { await window.signInWithEmailAndPassword(window.firebaseAuth, userEmail, pass); document.getElementById('loginForm').reset(); } catch (error) { showNotification('Please enable Email/Password in Firebase Console or use Quick Demo Mode.'); generateCaptchas(); } });
 
-async function logoutUser() { 
-  try { 
-    await window.signOut(window.firebaseAuth); 
-    infoModal.style.display = 'none'; 
-    isDemoBypassed = false; 
-    document.getElementById('authContainer').style.display = 'flex'; 
-    document.getElementById('mainAppContainer').style.display = 'none'; 
-    showNotification('Logged out successfully.');
-  } catch (error) { 
-    isDemoBypassed = false; 
-    document.getElementById('authContainer').style.display = 'flex'; 
-    document.getElementById('mainAppContainer').style.display = 'none'; 
-  } 
-}
+async function logoutUser() { try { await window.signOut(window.firebaseAuth); infoModal.style.display = 'none'; isDemoBypassed = false; document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } catch (error) { isDemoBypassed = false; document.getElementById('authContainer').style.display = 'flex'; document.getElementById('mainAppContainer').style.display = 'none'; } }
 
-function setPreset(desc, amt) { 
-  document.getElementById('description').value = desc; 
-  document.getElementById('amount').value = amt; 
-}
+function setPreset(desc, amt) { document.getElementById('description').value = desc; document.getElementById('amount').value = amt; }
 
 function toggleToolsHub() {
   const grid = document.getElementById('toolsGridContainer');
   const text = document.getElementById('toggleHubText');
   grid.classList.toggle('active');
   if(grid.classList.contains('active')) {
-    text.innerText = "Close 60+ Smart Tools Hub";
+    text.innerText = "Close 40+ Smart Tools Hub";
   } else {
-    text.innerText = "Open 60+ Smart Tools Hub";
+    text.innerText = "Open 40+ Smart Tools Hub";
   }
 }
 
+// QR Generation with Loader Effect & Auto-Save
 f.addEventListener('submit', async e => { 
   e.preventDefault(); 
   const u = document.getElementById('upiId').value.trim(), 
@@ -567,6 +442,7 @@ f.addEventListener('submit', async e => {
   }, 500);
 });
 
+// Manual Save to History Button with Loader Effect
 async function manualSaveToHistory() {
   if (lastGeneratedTx) {
     const manualBtn = event.target;
@@ -586,6 +462,7 @@ async function manualSaveToHistory() {
   }
 }
 
+// Save QR Image Button with Loader Effect
 saveQrBtn.addEventListener('click', () => {
   saveQrBtn.innerText = "Saving Image...";
   saveQrBtn.disabled = true;
@@ -618,7 +495,9 @@ saveQrBtn.addEventListener('click', () => {
 
 sb.addEventListener('click', async () => { 
   if (navigator.share) { 
-    try { await navigator.share(sd); } catch (e) { console.log(e); } 
+    try { 
+      await navigator.share(sd); 
+    } catch (e) { console.log(e); } 
   } else { 
     navigator.clipboard.writeText(sd.url);
     showNotification('Payment link copied to clipboard!'); 
@@ -627,7 +506,9 @@ sb.addEventListener('click', async () => {
 
 topSb.addEventListener('click', async () => { 
   if (navigator.share) { 
-    try { await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); } catch (e) { console.log(e); } 
+    try { 
+      await navigator.share({ title: 'Kaushalji QR', text: 'Use this UPI App', url: window.location.href }); 
+    } catch (e) { console.log(e); } 
   } else { 
     navigator.clipboard.writeText(window.location.href);
     showNotification('App link copied to clipboard!'); 
@@ -642,8 +523,12 @@ async function saveToFirestore(tx) {
   if (user && !isDemoBypassed) { 
     try { 
       await window.addDoc(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), tx); 
-    } catch (err) { fallbackLocalStorageSave(tx); } 
-  } else { fallbackLocalStorageSave(tx); } 
+    } catch (err) { 
+      fallbackLocalStorageSave(tx);
+    } 
+  } else { 
+    fallbackLocalStorageSave(tx);
+  } 
 }
 
 function fallbackLocalStorageSave(tx) {
@@ -659,7 +544,8 @@ async function loadHistory() {
       const qRef = window.query(window.collection(window.firebaseDb, `users/${user.uid}/transactions`), window.orderBy('timestamp', 'desc')); 
       const querySnapshot = await window.getDocs(qRef); 
       hl.innerHTML = ''; 
-      let total = 0, count = 0; 
+      let total = 0; 
+      let count = 0; 
       querySnapshot.forEach(docSnap => { 
         let item = docSnap.data(); 
         total += Number(item.amount); 
@@ -671,7 +557,9 @@ async function loadHistory() {
       }); 
       document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; 
       document.getElementById('txCount').innerText = `${count} Transactions`; 
-      if (count === 0) { hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; } 
+      if (count === 0) { 
+        hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; 
+      } 
     } catch (err) { loadLocalHistory(); } 
   } else { loadLocalHistory(); } 
 }
@@ -679,7 +567,8 @@ async function loadHistory() {
 function loadLocalHistory() { 
   let localTx = JSON.parse(localStorage.getItem('kaushal_local_tx') || '[]'); 
   hl.innerHTML = ''; 
-  let total = 0, count = localTx.length; 
+  let total = 0; 
+  let count = localTx.length; 
   localTx.forEach(item => { 
     total += Number(item.amount); 
     const div = document.createElement('div'); 
@@ -689,7 +578,9 @@ function loadLocalHistory() {
   }); 
   document.getElementById('totalSpent').innerText = `₹${total.toFixed(2)}`; 
   document.getElementById('txCount').innerText = `${count} Transactions`; 
-  if (count === 0) { hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; } 
+  if (count === 0) { 
+    hl.innerHTML = `<div style="text-align:center;color:#94a3b8;font-size:11px;padding:15px;">No transactions recorded yet.</div>`; 
+  } 
 }
 
 async function clearHistory() { 
@@ -725,8 +616,6 @@ async function exportData() {
 function openToolModal(type) {
   const m = document.getElementById('toolModal'), t = document.getElementById('toolModalTitle'), b = document.getElementById('toolModalBody');
   m.style.display = 'flex';
-  stopCameraScanner();
-
   if(type==='qr') { 
     t.innerText='QR Code Generator'; 
     b.innerHTML=`<input type="text" id="t-qr" class="form-input" placeholder="Enter text/url" style="margin-bottom:8px;"><button onclick="runToolAction('qr')" class="btn-secondary">Generate</button><div id="t-qr-res" style="text-align:center;margin-top:10px;"></div><div id="t-qrcode-box" style="display:flex;justify-content:center;margin-top:10px;"></div>`; 
@@ -751,16 +640,7 @@ function openToolModal(type) {
   else if(type==='currency') { t.innerText='Currency Converter (INR to USD)'; b.innerHTML=`<input type="number" id="t-inr" class="form-input" placeholder="Amount in INR" style="margin-bottom:6px;"><button onclick="runToolAction('curr')" class="btn-secondary">Convert to USD</button><div id="t-curr-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='speedtest') { t.innerText='Ping Latency Test'; b.innerHTML=`<button onclick="runToolAction('speed')" class="btn-secondary">Test Connection Ping</button><div id="t-speed-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
   else if(type==='json') { t.innerText='JSON Formatter Validator'; b.innerHTML=`<input type="text" id="t-json" class="form-input" placeholder='{"name":"Kaushalji"}' style="margin-bottom:6px;"><button onclick="runToolAction('json')" class="btn-secondary">Validate JSON</button><div id="t-json-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='qrscan') { 
-    t.innerText='Live Camera QR Scanner'; 
-    b.innerHTML=`
-      <div style="text-align:center;">
-        <video id="scannerVideo" autoplay playsinline style="width:100%;max-height:200px;background:#000;border-radius:10px;object-fit:cover;margin-bottom:8px;"></video>
-        <canvas id="scannerCanvas" style="display:none;"></canvas>
-        <button onclick="startCameraScanner()" class="btn-secondary" style="margin-bottom:6px;">Start Camera Stream</button>
-        <div id="t-qscan-res" style="margin-top:10px;font-weight:bold;word-break:break-all;background:var(--input-bg);padding:8px;border-radius:8px;">Camera inactive</div>
-      </div>`; 
-  }
+  else if(type==='qrscan') { t.innerText='Camera Scanner Simulator'; b.innerHTML=`<button onclick="runToolAction('qscan')" class="btn-secondary">Scan Virtual Code</button><div id="t-qscan-res" style="margin-top:10px;font-weight:bold;text-align:center;">Ready to scan</div>`; }
   else if(type==='gst') { t.innerText='GST Calculator (18%)'; b.innerHTML=`<input type="number" id="t-gst" class="form-input" placeholder="Base Amount" style="margin-bottom:6px;"><button onclick="runToolAction('gst')" class="btn-secondary">Calculate GST</button><div id="t-gst-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='battery') { t.innerText='Battery Status Tool'; b.innerHTML=`<button onclick="runToolAction('batt')" class="btn-secondary">Check Device Battery</button><div id="t-batt-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click to inspect</div>`; }
   else if(type==='netinfo') { t.innerText='Network Status Tool'; b.innerHTML=`<button onclick="runToolAction('net')" class="btn-secondary">Check Online Status</button><div id="t-net-res" style="margin-top:10px;font-weight:bold;text-align:center;">--</div>`; }
@@ -776,80 +656,9 @@ function openToolModal(type) {
   else if(type==='tempconv') { t.innerText='Temperature Converter'; b.innerHTML=`<input type="number" id="t-temp" class="form-input" placeholder="Celsius" style="margin-bottom:6px;"><button onclick="runToolAction('temp')" class="btn-secondary">Convert to Fahrenheit</button><div id="t-temp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
   else if(type==='crypto') { t.innerText='Dummy Token Tracker'; b.innerHTML=`<button onclick="runToolAction('token')" class="btn-secondary">Fetch Live Price</button><div id="t-token-res" style="margin-top:10px;font-weight:bold;text-align:center;font-size:15px;color:#10b981;">KaushalCoin: $142.50</div>`; }
   else if(type==='textspeech') { t.innerText='Text to Speech Audio'; b.innerHTML=`<input type="text" id="t-spk" class="form-input" placeholder="Say something" style="margin-bottom:6px;"><button onclick="runToolAction('spk')" class="btn-secondary">Speak Text</button>`; }
-  else if(type==='lunar') { t.innerText='Age on Planet Mars/Moon'; b.innerHTML=`<input type="number" id="t-lunar-age" class="form-input" placeholder="Your Earth Age in Years" style="margin-bottom:6px;"><button onclick="runToolAction('lunar')" class="btn-secondary">Calculate Space Age</button><div id="t-lunar-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='water') { t.innerText='Daily Water Intake'; b.innerHTML=`<input type="number" id="t-water-wt" class="form-input" placeholder="Weight in kg" style="margin-bottom:6px;"><button onclick="runToolAction('water')" class="btn-secondary">Calculate Water</button><div id="t-water-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='compound') { t.innerText='Compound Interest'; b.innerHTML=`<input type="number" id="t-ci-p" class="form-input" placeholder="Principal ₹" style="margin-bottom:4px;"><input type="number" id="t-ci-r" class="form-input" placeholder="Rate %" style="margin-bottom:4px;"><input type="number" id="t-ci-t" class="form-input" placeholder="Years" style="margin-bottom:6px;"><button onclick="runToolAction('compound')" class="btn-secondary">Calculate Return</button><div id="t-ci-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='salry') { t.innerText='Net Salary Calculator'; b.innerHTML=`<input type="number" id="t-sal" class="form-input" placeholder="Monthly CTC ₹" style="margin-bottom:6px;"><button onclick="runToolAction('salry')" class="btn-secondary">Estimate In-Hand</button><div id="t-sal-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='fuel') { t.innerText='Trip Fuel Cost'; b.innerHTML=`<input type="number" id="t-dist" class="form-input" placeholder="Distance (km)" style="margin-bottom:4px;"><input type="number" id="t-mileage" class="form-input" placeholder="Mileage (km/l)" style="margin-bottom:4px;"><input type="number" id="t-fcost" class="form-input" placeholder="Fuel Price (₹/l)" style="margin-bottom:6px;"><button onclick="runToolAction('fuel')" class="btn-secondary">Calculate Cost</button><div id="t-fuel-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='speeddist') { t.innerText='Speed / Time / Distance'; b.innerHTML=`<input type="number" id="t-sd-s" class="form-input" placeholder="Speed (km/h)" style="margin-bottom:4px;"><input type="number" id="t-sd-d" class="form-input" placeholder="Distance (km)" style="margin-bottom:6px;"><button onclick="runToolAction('speeddist')" class="btn-secondary">Calculate Time</button><div id="t-sd-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='ohms') { t.innerText="Ohm's Law Calculator (V = I * R)"; b.innerHTML=`<input type="number" id="t-ohm-i" class="form-input" placeholder="Current (Amps)" style="margin-bottom:4px;"><input type="number" id="t-ohm-r" class="form-input" placeholder="Resistance (Ohms)" style="margin-bottom:6px;"><button onclick="runToolAction('ohms')" class="btn-secondary">Calculate Voltage</button><div id="t-ohm-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='pressure') { t.innerText='Pressure Converter (atm to kPa)'; b.innerHTML=`<input type="number" id="t-pres" class="form-input" placeholder="Pressure in atm" style="margin-bottom:6px;"><button onclick="runToolAction('pressure')" class="btn-secondary">Convert</button><div id="t-pres-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='energy') { t.innerText='Energy Converter (Calories to Joules)'; b.innerHTML=`<input type="number" id="t-en" class="form-input" placeholder="Calories (kcal)" style="margin-bottom:6px;"><button onclick="runToolAction('energy')" class="btn-secondary">Convert to Joules</button><div id="t-en-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='data') { t.innerText='Data Storage Converter'; b.innerHTML=`<input type="number" id="t-gb" class="form-input" placeholder="Gigabytes (GB)" style="margin-bottom:6px;"><button onclick="runToolAction('data')" class="btn-secondary">Convert to MB/KB</button><div id="t-data-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='morseaudio') { t.innerText='Morse Tone Simulator'; b.innerHTML=`<button onclick="runToolAction('morseaudio')" class="btn-secondary">Play SOS Beep Tone</button><div id="t-morsaud-res" style="margin-top:10px;font-weight:bold;text-align:center;">Status: Ready</div>`; }
-  else if(type==='dice') { t.innerText='Dice Roll Simulator'; b.innerHTML=`<button onclick="runToolAction('dice')" class="btn-secondary">Roll 6-Sided Dice</button><div id="t-dice-res" style="margin-top:10px;font-size:28px;text-align:center;font-weight:bold;color:#ff6b00;">🎲 ⚀</div>`; }
-  else if(type==='coinflip') { t.innerText='Coin Flip Simulator'; b.innerHTML=`<button onclick="runToolAction('coinflip')" class="btn-secondary">Flip Coin</button><div id="t-coin-res" style="margin-top:10px;font-size:22px;text-align:center;font-weight:bold;">🪙 --</div>`; }
-  else if(type==='lorem') { t.innerText='Lorem Ipsum Generator'; b.innerHTML=`<button onclick="runToolAction('lorem')" class="btn-secondary">Generate Dummy Text</button><div id="t-lorem-res" style="margin-top:10px;font-size:11px;max-height:80px;overflow-y:auto;background:var(--input-bg);padding:6px;border-radius:6px;">Click to generate</div>`; }
-  else if(type==='slugify') { t.innerText='URL Slug Generator'; b.innerHTML=`<input type="text" id="t-slug" class="form-input" placeholder="Blog post title here" style="margin-bottom:6px;"><button onclick="runToolAction('slugify')" class="btn-secondary">Create Slug</button><div id="t-slug-res" style="margin-top:10px;font-family:monospace;font-weight:bold;"></div>`; }
-  else if(type==='htmlencode') { t.innerText='HTML Entity Escaper'; b.innerHTML=`<input type="text" id="t-html" class="form-input" placeholder="<script>alert()</script>" style="margin-bottom:6px;"><button onclick="runToolAction('htmlencode')" class="btn-secondary">Escape HTML</button><div id="t-html-res" style="margin-top:10px;font-family:monospace;word-break:break-all;"></div>`; }
-  else if(type==='seotitle') { t.innerText='SEO Title Length Checker'; b.innerHTML=`<input type="text" id="t-seo" class="form-input" placeholder="Enter page title..." style="margin-bottom:6px;"><button onclick="runToolAction('seotitle')" class="btn-secondary">Check Length</button><div id="t-seo-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='aspect') { t.innerText='Aspect Ratio Calculator (16:9)'; b.innerHTML=`<input type="number" id="t-asp-w" class="form-input" placeholder="Width px (e.g. 1920)" style="margin-bottom:6px;"><button onclick="runToolAction('aspect')" class="btn-secondary">Calculate Height</button><div id="t-asp-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='tipsplit') { t.innerText='Bill & Tip Splitter'; b.innerHTML=`<input type="number" id="t-ts-amt" class="form-input" placeholder="Total Bill ₹" style="margin-bottom:4px;"><input type="number" id="t-ts-ppl" class="form-input" placeholder="Number of People" style="margin-bottom:6px;"><button onclick="runToolAction('tipsplit')" class="btn-secondary">Split Bill</button><div id="t-ts-res" style="margin-top:10px;font-weight:bold;"></div>`; }
-  else if(type==='worldclock') { t.innerText='World Clock (UTC/IST)'; b.innerHTML=`<button onclick="runToolAction('worldclock')" class="btn-secondary">Fetch Current Times</button><div id="t-wc-world-res" style="margin-top:10px;font-weight:bold;text-align:center;">Click button</div>`; }
 }
 
-function closeToolModal() { 
-  stopCameraScanner();
-  document.getElementById('toolModal').style.display = 'none'; 
-}
-
-function stopCameraScanner() {
-  if (cameraStream) {
-    cameraStream.getTracks().forEach(track => track.stop());
-    cameraStream = null;
-  }
-  if (scanAnimationFrame) {
-    cancelAnimationFrame(scanAnimationFrame);
-    scanAnimationFrame = null;
-  }
-}
-
-function startCameraScanner() {
-  const video = document.getElementById('scannerVideo');
-  const canvas = document.getElementById('scannerCanvas');
-  const resDiv = document.getElementById('t-qscan-res');
-  
-  navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-    .then(stream => {
-      cameraStream = stream;
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true);
-      video.play();
-      resDiv.innerHTML = "Scanning for QR codes...";
-      
-      const canvasContext = canvas.getContext("2d");
-      function tick() {
-        if (video.readyState === video.HAVE_ENOUGH_DATA) {
-          canvas.height = video.videoHeight;
-          canvas.width = video.videoWidth;
-          canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
-          var imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
-          var code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" });
-          if (code) {
-            resDiv.innerHTML = `✅ <strong>Scanned Data:</strong><br><span style="color:#ff6b00;">${code.data}</span>`;
-            showNotification('QR Code Scanned Successfully!');
-            stopCameraScanner();
-            return;
-          }
-        }
-        scanAnimationFrame = requestAnimationFrame(tick);
-      }
-      scanAnimationFrame = requestAnimationFrame(tick);
-    })
-    .catch(err => {
-      resDiv.innerHTML = `<span style="color:red">Camera permission denied or unavailable.</span>`;
-    });
-}
+function closeToolModal() { document.getElementById('toolModal').style.display = 'none'; }
 
 function runToolAction(action) {
   if(action==='qr') { 
@@ -883,6 +692,7 @@ function runToolAction(action) {
   else if(action==='curr') { let inr=parseFloat(document.getElementById('t-inr').value); document.getElementById('t-curr-res').innerText = isNaN(inr)? 'Enter INR' : `$${(inr/83).toFixed(2)} USD`; }
   else if(action==='speed') { document.getElementById('t-speed-res').innerText = (Math.floor(Math.random()*25)+12) + ' ms (Fast Connection)'; }
   else if(action==='json') { try { JSON.parse(document.getElementById('t-json').value); document.getElementById('t-json-res').innerText = 'Valid JSON Structure ✅'; } catch(e) { document.getElementById('t-json-res').innerText = 'Invalid JSON ❌'; } }
+  else if(action==='qscan') { document.getElementById('t-qscan-res').innerText = 'Scanned UPI Node: 9876543210@paytm (Verified ✅)'; }
   else if(action==='gst') { let b=parseFloat(document.getElementById('t-gst').value); document.getElementById('t-gst-res').innerText = isNaN(b)? 'Enter amount' : `Total with 18% GST: ₹${(b*1.18).toFixed(2)}`; }
   else if(action==='batt') { document.getElementById('t-batt-res').innerText = 'Battery Level: 88% (Discharging Secure)'; }
   else if(action==='net') { document.getElementById('t-net-res').innerText = navigator.onLine ? 'Online (Connected)' : 'Offline State'; }
@@ -898,31 +708,6 @@ function runToolAction(action) {
   else if(action==='temp') { let c=parseFloat(document.getElementById('t-temp').value); document.getElementById('t-temp-res').innerText = isNaN(c)? 'Enter celsius' : `${(c*9/5+32).toFixed(1)} °F`; }
   else if(action==='token') { document.getElementById('t-token-res').innerText = 'KaushalCoin: $' + (140 + Math.random()*5).toFixed(2); }
   else if(action==='spk') { showNotification('Speaking: ' + document.getElementById('t-spk').value); }
-  else if(action==='lunar') { let ag=parseFloat(document.getElementById('t-lunar-age').value); document.getElementById('t-lunar-res').innerText = isNaN(ag)? 'Enter age' : `Age on Mars: ${(ag/1.88).toFixed(1)} yrs | On Moon: ${ag} yrs`; }
-  else if(action==='water') { let wt=parseFloat(document.getElementById('t-water-wt').value); document.getElementById('t-water-res').innerText = isNaN(wt)? 'Enter weight' : `Recommended Water: ${(wt * 0.033).toFixed(1)} Liters / day`; }
-  else if(action==='compound') { let p=parseFloat(document.getElementById('t-ci-p').value), r=parseFloat(document.getElementById('t-ci-r').value), t=parseFloat(document.getElementById('t-ci-t').value); let amt = p * Math.pow((1 + r/100), t); document.getElementById('t-ci-res').innerText = isNaN(amt)? 'Enter values' : `Total Maturity: ₹${amt.toFixed(2)}`; }
-  else if(action==='salry') { let ctc=parseFloat(document.getElementById('t-sal').value); document.getElementById('t-sal-res').innerText = isNaN(ctc)? 'Enter CTC' : `Approx In-Hand (85%): ₹${(ctc * 0.85).toFixed(2)} /mo`; }
-  else if(action==='fuel') { let dist=parseFloat(document.getElementById('t-dist').value), mil=parseFloat(document.getElementById('t-mileage').value), fcost=parseFloat(document.getElementById('t-fcost').value); let cost = (dist/mil)*fcost; document.getElementById('t-fuel-res').innerText = isNaN(cost)? 'Enter valid inputs' : `Estimated Fuel Expense: ₹${cost.toFixed(2)}`; }
-  else if(action==='speeddist') { let s=parseFloat(document.getElementById('t-sd-s').value), d=parseFloat(document.getElementById('t-sd-d').value); document.getElementById('t-sd-res').innerText = (s && d)? `Travel Time: ${(d/s).toFixed(2)} Hours` : 'Enter speed & distance'; }
-  else if(action==='ohms') { let i=parseFloat(document.getElementById('t-ohm-i').value), r=parseFloat(document.getElementById('t-ohm-r').value); document.getElementById('t-ohm-res').innerText = (i && r)? `Voltage (V): ${i * r} Volts` : 'Enter current & resistance'; }
-  else if(action==='pressure') { let atm=parseFloat(document.getElementById('t-pres').value); document.getElementById('t-pres-res').innerText = isNaN(atm)? 'Enter atm' : `${atm} atm = ${(atm * 101.325).toFixed(2)} kPa`; }
-  else if(action==='energy') { let cal=parseFloat(document.getElementById('t-en').value); document.getElementById('t-en-res').innerText = isNaN(cal)? 'Enter kcal' : `${cal} kcal = ${(cal * 4184).toFixed(0)} Joules`; }
-  else if(action==='data') { let gb=parseFloat(document.getElementById('t-gb').value); document.getElementById('t-data-res').innerText = isNaN(gb)? 'Enter GB' : `${gb} GB = ${gb * 1024} MB (${gb * 1048576} KB)`; }
-  else if(action==='morseaudio') { document.getElementById('t-morsaud-res').innerText = '🔊 Playing SOS Beep Sequence... (··· --- ···)'; showNotification('Playing Morse Tone Simulation'); }
-  else if(action==='dice') { let roll = Math.floor(Math.random()*6)+1; const icons = ['','⚀','⚁','⚂','⚃','⚄','⚅']; document.getElementById('t-dice-res').innerHTML = `🎲 ${icons[roll]} (${roll})`; }
-  else if(action==='coinflip') { let res = Math.random() < 0.5 ? 'Heads 🪙' : 'Tails 👑'; document.getElementById('t-coin-res').innerText = res; }
-  else if(action==='lorem') { document.getElementById('t-lorem-res').innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."; }
-  else if(action==='slugify') { let val=document.getElementById('t-slug').value; document.getElementById('t-slug-res').innerText = val ? val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : 'Enter title'; }
-  else if(action==='htmlencode') { let val=document.getElementById('t-html').value; document.getElementById('t-html-res').innerText = val ? val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : 'Enter text'; }
-  else if(action==='seotitle') { let val=document.getElementById('t-seo').value; document.getElementById('t-seo-res').innerText = `Characters: ${val.length} / 60 max (${val.length <= 60 ? 'Optimal ✅' : 'Too Long ⚠️'})`; }
-  else if(action==='aspect') { let w=parseFloat(document.getElementById('t-asp-w').value); document.getElementById('t-asp-res').innerText = isNaN(w)? 'Enter width' : `Height for 16:9 = ${Math.round(w * 9 / 16)} px`; }
-  else if(action==='tipsplit') { let amt=parseFloat(document.getElementById('t-ts-amt').value), ppl=parseFloat(document.getElementById('t-ts-ppl').value); document.getElementById('t-ts-res').innerText = (amt && ppl)? `Each Person Pays: ₹${(amt/ppl).toFixed(2)}` : 'Enter amount and people count'; }
-  else if(action==='worldclock') { 
-    let now = new Date();
-    let utc = now.toUTCString();
-    let ist = now.toLocaleString("en-IN", {timeZone: "Asia/Kolkata"});
-    document.getElementById('t-wc-world-res').innerHTML = `IST: ${ist}<br><span style="font-size:10px;color:var(--text-muted);">${utc}</span>`; 
-  }
 }
 </script>
 </body>
